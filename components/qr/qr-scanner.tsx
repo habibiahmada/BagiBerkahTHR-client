@@ -16,6 +16,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isScanningRef = useRef(false);
   const elementId = "qr-reader";
 
   const startScanning = async () => {
@@ -30,6 +31,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       const config = {
         fps: 10,
         qrbox: { width: 250, height: 250 },
+        aspectRatio: 1.0,
       };
 
       await scannerRef.current.start(
@@ -43,29 +45,36 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           // Ignore continuous scanning errors
         }
       );
+      
+      isScanningRef.current = true;
     } catch (err: any) {
       const errorMsg = "Gagal mengakses kamera. Pastikan izin kamera diberikan.";
       setError(errorMsg);
       if (onError) onError(errorMsg);
       setIsScanning(false);
+      isScanningRef.current = false;
     }
   };
 
   const stopScanning = async () => {
     try {
-      if (scannerRef.current && scannerRef.current.isScanning) {
+      if (scannerRef.current && isScanningRef.current) {
         await scannerRef.current.stop();
+        isScanningRef.current = false;
       }
       setIsScanning(false);
     } catch (err) {
       console.error("Error stopping scanner:", err);
+      setIsScanning(false);
+      isScanningRef.current = false;
     }
   };
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current) {
+      if (scannerRef.current && isScanningRef.current) {
         scannerRef.current.stop().catch(console.error);
+        isScanningRef.current = false;
       }
     };
   }, []);
@@ -76,11 +85,19 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         <CardTitle>Scan QR Code</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div
-          id={elementId}
-          className="w-full rounded-xl overflow-hidden bg-black"
-          style={{ minHeight: isScanning ? "300px" : "0px" }}
-        />
+        {isScanning && (
+          <div
+            id={elementId}
+            className="w-full rounded-xl overflow-hidden"
+          />
+        )}
+        
+        {!isScanning && (
+          <div
+            id={elementId}
+            className="w-full h-0 overflow-hidden"
+          />
+        )}
 
         {error && (
           <Alert variant="error">

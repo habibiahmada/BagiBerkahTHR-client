@@ -53,7 +53,7 @@ export function QRGenerator({
             value={value}
             size={size}
             level="H"
-            includeMargin={true}
+            marginSize={4}
           />
         </div>
         {showDownload && (
