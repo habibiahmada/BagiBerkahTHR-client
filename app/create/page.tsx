@@ -61,7 +61,9 @@ export default function CreateEnvelopePage() {
     if (step === 1 && totalBudget) {
       setStep(2);
     } else if (step === 2 && recipients.length > 0) {
-      setStep(3);
+      // Navigate to AI allocation page
+      const recipientsParam = encodeURIComponent(JSON.stringify(recipients));
+      router.push(`/create/allocation?budget=${totalBudget}&recipients=${recipientsParam}`);
     }
   };
 
@@ -294,29 +296,7 @@ export default function CreateEnvelopePage() {
             </div>
           )}
 
-          {/* Step 3: AI Allocation (Placeholder) */}
-          {step === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Allocation</CardTitle>
-                <CardDescription>
-                  AI sedang menganalisis data penerima...
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-muted-foreground py-8">
-                  Fitur AI Allocation akan diimplementasikan di sini...
-                </p>
-                <Button
-                  onClick={() => router.push("/")}
-                  className="w-full"
-                  variant="outline"
-                >
-                  Kembali ke Home
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+
         </div>
       </main>
 
