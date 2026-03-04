@@ -28,13 +28,22 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
+      const data = await response.json();
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Something went wrong');
+        // Extract error message from response
+        let errorMessage = data.error?.message || data.message || 'Something went wrong';
+        
+        // If validation errors exist, format them
+        if (data.errors && Array.isArray(data.errors)) {
+          const errorDetails = data.errors.map((e: any) => `${e.field}: ${e.message}`).join(', ');
+          errorMessage = `${errorMessage} - ${errorDetails}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      return await response.json();
+      return data;
     } catch (error) {
       console.error('API Error:', error);
       throw error;
@@ -85,6 +94,7 @@ class ApiClient {
   }
 
   async validateQR(qrToken: string) {
+    console.log('🔐 API validateQR called with:', { qrToken, length: qrToken.length });
     return this.request(`/claims/validate-qr`, {
       method: 'POST',
       body: JSON.stringify({ qrToken }),

@@ -73,6 +73,10 @@ export default function EnvelopeDetailPage() {
   };
 
   const handleQRScan = async (qrToken: string) => {
+    console.log('📱 QR Scanned:', qrToken);
+    console.log('📱 QR Token length:', qrToken.length);
+    console.log('📱 QR Token type:', typeof qrToken);
+    
     try {
       const response: any = await api.validateQR(qrToken);
 

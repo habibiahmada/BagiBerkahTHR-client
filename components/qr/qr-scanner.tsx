@@ -17,12 +17,15 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   const [error, setError] = useState<string | null>(null);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isScanningRef = useRef(false);
-  const elementId = "qr-reader";
+  const elementId = useRef(`qr-reader-${Date.now()}`).current;
 
   const startScanning = async () => {
     try {
       setError(null);
       setIsScanning(true);
+
+      // Wait for DOM to update
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       if (!scannerRef.current) {
         scannerRef.current = new Html5Qrcode(elementId);
@@ -31,7 +34,6 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       const config = {
         fps: 10,
         qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
       };
 
       await scannerRef.current.start(
@@ -41,7 +43,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           onScan(decodedText);
           stopScanning();
         },
-        (errorMessage) => {
+        () => {
           // Ignore continuous scanning errors
         }
       );
@@ -85,19 +87,14 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         <CardTitle>Scan QR Code</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isScanning && (
-          <div
-            id={elementId}
-            className="w-full rounded-xl overflow-hidden"
-          />
-        )}
-        
-        {!isScanning && (
-          <div
-            id={elementId}
-            className="w-full h-0 overflow-hidden"
-          />
-        )}
+        <div
+          id={elementId}
+          className="w-full"
+          style={{ 
+            minHeight: isScanning ? "400px" : "0px",
+            display: isScanning ? "block" : "none"
+          }}
+        />
 
         {error && (
           <Alert variant="error">
