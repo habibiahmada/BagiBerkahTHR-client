@@ -17,6 +17,7 @@ import { Footer } from "@/components/layout/footer";
 import { BankAccountForm } from "@/components/claim/bank-account-form";
 import { QRDisplayCard } from "@/components/qr/qr-display-card";
 import { ClaimSuccess } from "@/components/claim/claim-success";
+import { Confetti } from "@/components/animations/confetti";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ export default function ClaimPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [claimResult, setClaimResult] = useState<any>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     fetchClaimData();
@@ -88,6 +90,8 @@ export default function ClaimPage() {
 
   const handleQuizAnswer = () => {
     setStep("reveal");
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000);
   };
 
   const handleRevealNext = () => {
@@ -374,6 +378,9 @@ export default function ClaimPage() {
       </main>
 
       <Footer />
+
+      {/* Confetti Effect */}
+      <Confetti active={showConfetti} />
     </div>
   );
 }
