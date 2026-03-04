@@ -65,10 +65,15 @@ export default function ClaimPage() {
           expiresAt: response.data.expiresAt,
         });
         
-        // Check if already claimed
-        if (response.data.status === "CLAIMED" || response.data.status === "VALIDATED") {
+        // Check if already claimed/validated
+        if (response.data.status === "VALIDATED") {
           setStep("claimed");
           setClaimResult(response.data);
+        } else if (response.data.status === "CLAIMED") {
+          // Already submitted, show appropriate view
+          setSelectedMethod(response.data.claimMethod);
+          setClaimResult(response.data);
+          setStep("claimed");
         } else {
           setStep("envelope");
         }

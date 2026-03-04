@@ -130,11 +130,16 @@ export default function EnvelopeDetailPage() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, mode: string) => {
     switch (status) {
       case "VALIDATED":
-      case "CLAIMED":
         return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "CLAIMED":
+        // For digital mode, CLAIMED means complete (transfer processing)
+        // For cash mode, CLAIMED means waiting for QR validation
+        return mode === "DIGITAL" 
+          ? <CheckCircle className="w-5 h-5 text-green-600" />
+          : <Clock className="w-5 h-5 text-blue-600" />;
       case "OPENED":
         return <Clock className="w-5 h-5 text-yellow-600" />;
       case "EXPIRED":
@@ -144,12 +149,14 @@ export default function EnvelopeDetailPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, mode: string) => {
     const statusConfig: Record<string, { variant: any; label: string }> = {
       PENDING: { variant: "default", label: "Belum Dibuka" },
       OPENED: { variant: "warning", label: "Sudah Dibuka" },
-      CLAIMED: { variant: "info", label: "Diklaim" },
-      VALIDATED: { variant: "success", label: "Tervalidasi" },
+      CLAIMED: mode === "DIGITAL" 
+        ? { variant: "success", label: "Transfer Diproses" }
+        : { variant: "info", label: "Menunggu Validasi" },
+      VALIDATED: { variant: "success", label: "Selesai" },
       EXPIRED: { variant: "error", label: "Kadaluarsa" },
     };
 
@@ -197,9 +204,15 @@ export default function EnvelopeDetailPage() {
     );
   }
 
-  const claimedCount = envelope.recipients.filter(
-    (r) => r.claim.status === "CLAIMED" || r.claim.status === "VALIDATED"
-  ).length;
+  const claimedCount = envelope.recipients.filter((r) => {
+    // For digital mode, CLAIMED is complete
+    // For cash mode, only VALIDATED is complete
+    if (envelope.distributionMode === "DIGITAL") {
+      return r.claim.status === "CLAIMED" || r.claim.status === "VALIDATED";
+    } else {
+      return r.claim.status === "VALIDATED";
+    }
+  }).length;
   const progress = (claimedCount / envelope.recipients.length) * 100;
 
   return (
@@ -322,7 +335,7 @@ export default function EnvelopeDetailPage() {
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3">
-                        {getStatusIcon(recipient.claim.status)}
+                        {getStatusIcon(recipient.claim.status, envelope.distributionMode)}
                         <div>
                           <h4 className="font-semibold text-foreground">
                             {recipient.name}
@@ -332,7 +345,7 @@ export default function EnvelopeDetailPage() {
                           </p>
                         </div>
                       </div>
-                      {getStatusBadge(recipient.claim.status)}
+                      {getStatusBadge(recipient.claim.status, envelope.distributionMode)}
                     </div>
 
                     {recipient.claim.status === "PENDING" && (
