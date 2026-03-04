@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
+/* ===== BagiBerkah Design System ===== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary — Soft Emerald / Sage Green (Ramadhan feel) */
+  --primary: #4d7c5e;
+  --primary-light: #6a9b7b;
+  --primary-lighter: #e8f5ee;
+  --primary-foreground: #ffffff;
+
+  /* Secondary — Warm Gold (Festive, elegant) */
+  --secondary: #d4a843;
+  --secondary-light: #f5e6b8;
+  --secondary-foreground: #3d2e0a;
+
+  /* Backgrounds */
+  --background: #fafaf8;
+  --foreground: #2d3436;
+
+  /* Muted */
+  --muted: #f1f0ec;
+  --muted-foreground: #6b7280;
+
+  /* Card */
+  --card: #ffffff;
+  --card-foreground: #2d3436;
+
+  /* Border */
+  --border: #e5e2db;
+
+  /* Accent */
+  --accent: #f0ece4;
+  --accent-foreground: #2d3436;
+
+  /* Ring (focus) */
+  --ring: #4d7c5e;
+
+  /* Destructive */
+  --destructive: #dc4a4a;
+  --destructive-foreground: #ffffff;
+
+  /* Radius */
+  --radius: 0.75rem;
 }
 
+/* ===== Tailwind v4 Theme Tokens ===== */
 @theme inline {
+  /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-primary-lighter: var(--primary-lighter);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-light: var(--secondary-light);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Fonts */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 16px -2px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 8px 30px -4px rgba(0, 0, 0, 0.1);
+
+  /* Animations */
+  --animate-float: float 4s ease-in-out infinite;
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-12px);
+    }
   }
 }
 
+/* ===== Global Styles ===== */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Custom Utility Classes ===== */
+
+/* Glassmorphism navbar */
+.glass {
+  background: rgba(250, 250, 248, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Hero gradient background */
+.bg-gradient-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, var(--secondary) 100%);
+}
+
+/* Hero gradient text */
+.text-gradient-hero {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--primary-lighter);
+  color: var(--primary);
 }
