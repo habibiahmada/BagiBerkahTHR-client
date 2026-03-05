@@ -380,9 +380,11 @@ export default function EnvelopeDetailPage() {
                           <p className="text-sm text-muted-foreground">
                             {formatCurrency(recipient.allocatedAmount)}
                           </p>
-                          <div className="flex gap-2 mt-2">
-                            {getPlayableBadge(recipient.playableType, recipient.gameType)}
-                          </div>
+                          {recipient.playableType && (
+                            <div className="flex gap-2 mt-2">
+                              {getPlayableBadge(recipient.playableType, recipient.gameType)}
+                            </div>
+                          )}
                         </div>
                       </div>
                       {getStatusBadge(recipient.claim.status, envelope.distributionMode)}
