@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Brain, Edit, RefreshCw, Check, BarChart3, PieChart as PieChartIcon, Table } from "lucide-react";
@@ -20,7 +20,7 @@ import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient } from "@/lib/types";
 
-export default function AllocationPage() {
+function AllocationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -352,5 +352,31 @@ export default function AllocationPage() {
         onSave={handleManualEdit}
       />
     </div>
+  );
+}
+
+export default function AllocationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <Skeleton className="h-8 w-48 mb-8" />
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-[300px] w-full" />
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <AllocationContent />
+    </Suspense>
   );
 }
