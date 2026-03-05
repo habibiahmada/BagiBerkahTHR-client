@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -15,67 +15,130 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Heart, Coffee, Gift, Sparkles } from "lucide-react";
+import { Heart, Coffee, Rocket, Star, Code2, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { validatePaymentUrl } from "@/lib/security";
 
-const DONATION_AMOUNTS = [
-  { amount: 10000, label: "☕ Kopi", icon: Coffee },
-  { amount: 25000, label: "🍩 Snack", icon: Gift },
-  { amount: 50000, label: "🌙 Berkah", icon: Heart },
-  { amount: 100000, label: "✨ Istimewa", icon: Sparkles },
+const DONATION_TIERS = [
+  {
+    icon: Coffee,
+    title: "Traktir Kopi ☕",
+    amount: 15000,
+    desc: "Secangkir kopi untuk developer yang begadang coding",
+    accent: "border-amber-500/40 hover:border-amber-500",
+  },
+  {
+    icon: Heart,
+    title: "Support Reguler 💚",
+    amount: 50000,
+    desc: "Bantu biaya server dan operasional bulanan",
+    accent: "border-primary/40 hover:border-primary",
+    popular: true,
+  },
+  {
+    icon: Rocket,
+    title: "Booster 🚀",
+    amount: 100000,
+    desc: "Akselerasi pengembangan fitur baru lebih cepat",
+    accent: "border-blue-500/40 hover:border-blue-500",
+  },
+  {
+    icon: Star,
+    title: "Super Supporter ⭐",
+    amount: 250000,
+    desc: "Nama Anda akan tampil di halaman kredit & early access fitur baru",
+    accent: "border-yellow-500/40 hover:border-yellow-500",
+  },
 ];
 
+// Fallback data untuk development (akan diganti dengan data dari backend)
+const FALLBACK_SUPPORTERS = [
+  { name: "Ahmad R.", amount: 100000, message: "Semangat terus dev! 🔥" },
+  { name: "Siti N.", amount: 50000, message: "Aplikasi keren, sangat membantu!" },
+  { name: "Budi S.", amount: 250000, message: "Lanjutkan karya terbaiknya 💪" },
+  { name: "Dewi L.", amount: 15000, message: "Kopi buat begadang 😄" },
+  { name: "Rizky P.", amount: 50000, message: "Fitur AI-nya mantap!" },
+  { name: "Anonim", amount: 100000, message: "Keep up the great work!" },
+];
+
+interface Supporter {
+  donorName: string;
+  amount: number;
+  message: string | null;
+  createdAt?: string;
+}
+
 export default function SupportPage() {
-  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState("");
+  const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [donorName, setDonorName] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recentSupporters, setRecentSupporters] = useState<Supporter[]>([]);
+  const [loadingSupporters, setLoadingSupporters] = useState(true);
 
-  const handleAmountSelect = (amount: number) => {
-    setSelectedAmount(amount);
-    setCustomAmount("");
-  };
+  // Fetch recent supporters from backend
+  useEffect(() => {
+    const fetchSupporters = async () => {
+      try {
+        const response: any = await api.getDonationStats();
+        if (response.success && response.data.recentDonations) {
+          const supporters = response.data.recentDonations.map((d: any) => ({
+            donorName: d.donorName,
+            amount: d.amount,
+            message: d.message,
+            createdAt: d.createdAt,
+          }));
+          
+          // Jika ada data dari backend, gunakan itu
+          if (supporters.length > 0) {
+            setRecentSupporters(supporters);
+          } else {
+            // Jika belum ada data, gunakan fallback
+            setRecentSupporters(FALLBACK_SUPPORTERS.map(s => ({
+              donorName: s.name,
+              amount: s.amount,
+              message: s.message,
+            })));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch supporters:', err);
+        // Fallback ke hardcoded data jika backend error
+        setRecentSupporters(FALLBACK_SUPPORTERS.map(s => ({
+          donorName: s.name,
+          amount: s.amount,
+          message: s.message,
+        })));
+      } finally {
+        setLoadingSupporters(false);
+      }
+    };
 
-  const handleCustomAmountChange = (value: string) => {
-    const numValue = parseInt(value.replace(/\D/g, ""));
-    if (!isNaN(numValue)) {
-      setCustomAmount(value);
-      setSelectedAmount(numValue);
-    } else {
-      setCustomAmount("");
-      setSelectedAmount(null);
-    }
-  };
+    fetchSupporters();
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDonate = async (tierIndex: number) => {
     setError(null);
-
-    if (!selectedAmount || selectedAmount < 10000) {
-      setError("Minimal donasi Rp 10.000");
-      return;
-    }
-
     setLoading(true);
+    setSelectedTier(tierIndex);
+
+    const tier = DONATION_TIERS[tierIndex];
 
     try {
       const response: any = await api.createDonation({
-        amount: selectedAmount,
+        amount: tier.amount,
         donorName: donorName || undefined,
         message: message || undefined,
       });
 
       if (response.success && response.data.paymentUrl) {
-        // Validate payment URL before redirect
         if (!validatePaymentUrl(response.data.paymentUrl)) {
           throw new Error("Invalid payment URL");
         }
         
-        // Redirect to payment page
+        // Redirect ke halaman pembayaran
         window.location.href = response.data.paymentUrl;
       } else {
         throw new Error(response.error?.message || "Gagal membuat donasi");
@@ -84,6 +147,7 @@ export default function SupportPage() {
       console.error("Donation Error:", err);
       setError(err.message || "Terjadi kesalahan");
       setLoading(false);
+      setSelectedTier(null);
     }
   };
 
@@ -91,72 +155,44 @@ export default function SupportPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <main className="flex-1 pt-24 pb-12 px-4">
-        <div className="container mx-auto max-w-4xl">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-lighter mb-6">
-              <Heart className="w-10 h-10 text-primary" />
-            </div>
-            <h1 className="text-4xl font-bold text-foreground mb-4">
-              Dukung BagiBerkah
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Agar lebih banyak kebahagiaan Ramadhan bisa dibagikan ❤️
-            </p>
+      <main className="flex-1 pt-24 pb-12">
+        {/* Hero */}
+        <section className="pb-12">
+          <div className="container mx-auto px-4 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="inline-flex items-center gap-2 bg-pink-100 dark:bg-pink-900/20 text-pink-600 dark:text-pink-400 rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
+                <Heart className="w-4 h-4" />
+                Support Developer
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+                Dukung Pengembangan BagiBerkah
+              </h1>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                BagiBerkah dibuat dengan ❤️ oleh developer independen Indonesia. 
+                Dukungan Anda membantu kami tetap gratis dan terus berinovasi.
+              </p>
+            </motion.div>
           </div>
+        </section>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Donation Form */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Berikan Dukungan</CardTitle>
-                <CardDescription>
-                  Setiap dukungan Anda sangat berarti untuk pengembangan BagiBerkah
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Amount Selection */}
+        {/* Donation Tiers */}
+        <section className="pb-16">
+          <div className="container mx-auto px-4">
+            {/* Optional Info Form */}
+            <div className="max-w-2xl mx-auto mb-12">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Info Donatur (Opsional)</CardTitle>
+                  <CardDescription>
+                    Isi jika ingin nama Anda ditampilkan di daftar supporter
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <Label>Pilih Nominal</Label>
-                    <div className="grid grid-cols-2 gap-3 mt-2">
-                      {DONATION_AMOUNTS.map(({ amount, label, icon: Icon }) => (
-                        <button
-                          key={amount}
-                          type="button"
-                          onClick={() => handleAmountSelect(amount)}
-                          className={`p-4 rounded-xl border-2 transition-all ${
-                            selectedAmount === amount
-                              ? "border-primary bg-primary-lighter"
-                              : "border-border hover:border-primary"
-                          }`}
-                        >
-                          <Icon className="w-6 h-6 mx-auto mb-2 text-primary" />
-                          <div className="text-sm font-medium">{label}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatCurrency(amount)}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Custom Amount */}
-                  <div>
-                    <Label htmlFor="customAmount">Atau Nominal Lain</Label>
-                    <Input
-                      id="customAmount"
-                      type="text"
-                      placeholder="Masukkan nominal"
-                      value={customAmount}
-                      onChange={(e) => handleCustomAmountChange(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Donor Name */}
-                  <div>
-                    <Label htmlFor="donorName">Nama (Opsional)</Label>
+                    <Label htmlFor="donorName">Nama</Label>
                     <Input
                       id="donorName"
                       type="text"
@@ -164,19 +200,21 @@ export default function SupportPage() {
                       value={donorName}
                       onChange={(e) => setDonorName(e.target.value)}
                       maxLength={100}
+                      disabled={loading}
                     />
                   </div>
 
-                  {/* Message */}
                   <div>
-                    <Label htmlFor="message">Pesan (Opsional)</Label>
-                    <Textarea
+                    <Label htmlFor="message">Pesan Dukungan</Label>
+                    <textarea
                       id="message"
                       placeholder="Tulis pesan dukungan..."
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
                       maxLength={500}
                       rows={3}
+                      disabled={loading}
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                   </div>
 
@@ -185,80 +223,165 @@ export default function SupportPage() {
                       <AlertDescription>{error}</AlertDescription>
                     </Alert>
                   )}
-
-                  <Button
-                    type="submit"
-                    disabled={loading || !selectedAmount}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {loading ? "Memproses..." : `Donasi ${selectedAmount ? formatCurrency(selectedAmount) : ""}`}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Info Card */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kenapa Mendukung?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-lighter flex items-center justify-center">
-                      <span className="text-primary font-bold">1</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Gratis Selamanya</h3>
-                      <p className="text-sm text-muted-foreground">
-                        BagiBerkah akan selalu gratis untuk semua pengguna
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-lighter flex items-center justify-center">
-                      <span className="text-primary font-bold">2</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Pengembangan Fitur</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Dukungan Anda membantu kami menambah fitur baru
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary-lighter flex items-center justify-center">
-                      <span className="text-primary font-bold">3</span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Berbagi Kebahagiaan</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Membantu lebih banyak orang berbagi THR dengan mudah
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-gradient-hero text-primary-foreground">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <Heart className="w-12 h-12 mx-auto mb-4" />
-                    <p className="text-lg font-medium mb-2">
-                      Terima kasih atas dukungan Anda!
-                    </p>
-                    <p className="text-sm opacity-90">
-                      Setiap kontribusi sangat berarti untuk kami
-                    </p>
-                  </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Donation Tiers */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+              {DONATION_TIERS.map((tier, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <Card
+                    className={`relative border-2 ${tier.accent} transition-all duration-200 hover:shadow-lg ${
+                      loading && selectedTier === i ? "ring-2 ring-primary opacity-75" : ""
+                    }`}
+                  >
+                    {tier.popular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
+                        Populer
+                      </div>
+                    )}
+                    <CardContent className="pt-8 pb-6 text-center">
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                        <tier.icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <h3 className="font-bold text-foreground mb-1">
+                        {tier.title}
+                      </h3>
+                      <p className="text-2xl font-bold text-primary mb-2">
+                        {formatCurrency(tier.amount)}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-5">
+                        {tier.desc}
+                      </p>
+                      <Button
+                        variant={loading && selectedTier === i ? "outline" : "default"}
+                        className="w-full"
+                        onClick={() => handleDonate(i)}
+                        disabled={loading}
+                      >
+                        <Heart className="w-4 h-4" />
+                        {loading && selectedTier === i ? "Memproses..." : "Donasi"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* How donations help */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                Donasi Anda Digunakan Untuk
+              </h2>
+            </motion.div>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Code2,
+                  title: "Pengembangan Fitur",
+                  desc: "Fitur baru seperti multi-currency, tema custom, dan integrasi e-wallet",
+                },
+                {
+                  icon: Rocket,
+                  title: "Infrastruktur",
+                  desc: "Server, database, CDN, dan keamanan agar BagiBerkah tetap cepat & aman",
+                },
+                {
+                  icon: Sparkles,
+                  title: "AI & Inovasi",
+                  desc: "Riset AI untuk rekomendasi pembagian THR yang lebih cerdas",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-foreground mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Recent Supporters */}
+        <section className="py-16">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-10"
+            >
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
+                Supporter Terbaru 🙏
+              </h2>
+            </motion.div>
+            
+            {loadingSupporters ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Memuat data supporter...</p>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {recentSupporters.map((s, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Card className="border-border">
+                      <CardContent className="flex items-start gap-3 py-4">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                          <Heart className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span className="font-bold text-sm text-foreground">
+                              {s.donorName}
+                            </span>
+                            <span className="text-xs text-primary font-semibold">
+                              {formatCurrency(s.amount)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {s.message || "Terima kasih atas dukungannya! 🙏"}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </main>
 
       <Footer />

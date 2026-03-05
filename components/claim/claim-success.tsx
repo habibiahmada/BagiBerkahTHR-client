@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle, Home, Share2 } from "lucide-react";
+import { CheckCircle, Home, Share2, Heart } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -113,6 +114,12 @@ export function ClaimSuccess({
           <Share2 className="w-4 h-4" />
           Bagikan Kebahagiaan
         </Button>
+        <Link href="/support" className="w-full">
+          <Button variant="outline" className="w-full">
+            <Heart className="w-4 h-4" />
+            Dukung BagiBerkah
+          </Button>
+        </Link>
         <Button onClick={() => window.location.href = "/"} className="w-full">
           <Home className="w-4 h-4" />
           Kembali ke Home

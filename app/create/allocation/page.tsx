@@ -19,7 +19,6 @@ import { ManualEditModal } from "@/components/allocation/manual-edit-modal";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient } from "@/lib/types";
-import { validateBudget, validateRecipient, logger } from "@/lib/security";
 
 export default function AllocationPage() {
   const router = useRouter();
@@ -75,7 +74,7 @@ export default function AllocationPage() {
       });
 
       if (response.success) {
-        const allocationsData = response.data.allocations.map((alloc: any, index: number) => ({
+        const allocationsData = response.data.allocations.map((alloc: any) => ({
           name: recipientsData[alloc.recipientIndex].name,
           amount: alloc.amount,
           reasoning: alloc.reasoning,

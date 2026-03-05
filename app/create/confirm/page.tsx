@@ -385,6 +385,11 @@ export default function ConfirmPage() {
           </Card>
 
           <div className="flex justify-end gap-3">
+            <Link href="/support">
+              <Button variant="outline">
+                ❤️ Dukung BagiBerkah
+              </Button>
+            </Link>
             <Button
               variant="outline"
               onClick={() => router.push("/dashboard")}

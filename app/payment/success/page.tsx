@@ -205,6 +205,15 @@ export default function PaymentSuccessPage() {
                 Lihat Detail Amplop
               </Button>
             )}
+            <Link href="/support" className="w-full">
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+              >
+                ❤️ Dukung BagiBerkah
+              </Button>
+            </Link>
             <Button
               onClick={() => router.push("/dashboard")}
               variant="outline"

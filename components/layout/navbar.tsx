@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Moon, LayoutDashboard, Gift } from "lucide-react";
+import { Moon, LayoutDashboard, Gift, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
@@ -21,6 +21,15 @@ export function Navbar() {
                 </Link>
 
                 <div className="flex items-center gap-2">
+                    <Link href="/support">
+                        <Button
+                            variant={pathname === "/support" ? "default" : "ghost"}
+                            size="sm"
+                        >
+                            <Heart className="w-4 h-4" />
+                            <span className="hidden sm:inline">Support</span>
+                        </Button>
+                    </Link>
                     <Link href="/dashboard">
                         <Button
                             variant={pathname === "/dashboard" ? "default" : "ghost"}

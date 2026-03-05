@@ -76,7 +76,7 @@ export function AllocationBarChart({ data }: AllocationBarChartProps) {
         />
         <Tooltip content={<CustomTooltip />} />
         <Bar dataKey="amount" radius={[8, 8, 0, 0]}>
-          {chartData.map((entry, index) => (
+          {chartData.map((_item, index) => (
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Bar>

@@ -39,15 +39,15 @@ export function Footer() {
                                     href="/dashboard"
                                     className="hover:text-foreground transition-colors"
                                 >
-                                    Dashboard
+                                    Cek Status
                                 </Link>
                             </li>
                             <li>
                                 <Link
-                                    href="/claim/demo"
+                                    href="/support"
                                     className="hover:text-foreground transition-colors"
                                 >
-                                    Demo Klaim
+                                    Dukung Kami
                                 </Link>
                             </li>
                         </ul>
@@ -80,7 +80,7 @@ export function Footer() {
 
                 <div className="border-t border-border pt-6 text-center">
                     <p className="text-sm text-muted-foreground">
-                        © 2026 BagiBerkah. Membuat setiap THR lebih bermakna 🌙
+                        © 2026 BagiBerkah. by <a href="https://habibiahmada.dev">habibiahmada.dev</a> Membuat setiap THR lebih bermakna 🌙
                     </p>
                 </div>
             </div>

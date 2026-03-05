@@ -27,7 +27,6 @@ export function CtaSection() {
                             priority
                         />
                     </div>
-                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/20 to-background/30 rounded-3xl" />
                     {/* Decorative circles */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-6 left-10 w-16 h-16 rounded-full border-2 border-primary-foreground/30" />
