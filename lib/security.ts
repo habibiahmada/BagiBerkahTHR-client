@@ -20,6 +20,7 @@ export const validatePaymentUrl = (url: string): boolean => {
       // Mayar (Support developer feature)
       'mayar.id',
       'api.mayar.id',
+      'myr.id', // Mayar payment links
       'mayar.club',
       'api.mayar.club',
       'sandbox.mayar.id',
