@@ -13,7 +13,7 @@ interface MethodSelectionProps {
     bankName: string,
     accountNumber: string,
     accountHolderName: string
-  ) => void;
+  ) => Promise<void>;
   submitting: boolean;
   error: string | null;
 }
