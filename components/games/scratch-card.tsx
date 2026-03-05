@@ -107,7 +107,7 @@ export function ScratchCard({ onComplete }: ScratchCardProps) {
         </p>
       </CardHeader>
       <CardContent>
-        <div className="relative w-full aspect-video bg-gradient-to-br from-primary to-primary/70 rounded-xl overflow-hidden">
+        <div className="relative w-full aspect-video bg-linear-to-br from-primary to-primary/70 rounded-xl overflow-hidden">
           {/* Prize underneath */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">

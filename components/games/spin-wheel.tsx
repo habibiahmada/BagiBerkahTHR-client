@@ -46,7 +46,7 @@ export function SpinWheel({ onComplete }: SpinWheelProps) {
         <div className="relative w-64 h-64">
           {/* Pointer */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-            <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-primary" />
+            <div className="w-0 h-0 border-l-15 border-l-transparent border-r-15 border-r-transparent border-t-30 border-t-primary" />
           </div>
 
           {/* Wheel */}
@@ -61,26 +61,26 @@ export function SpinWheel({ onComplete }: SpinWheelProps) {
             {/* Segments */}
             <div className="absolute inset-0">
               {/* WIN segment (top) */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 clip-segment-1">
+              <div className="absolute inset-0 bg-linear-to-br from-primary to-primary/80 clip-segment-1">
                 <div className="absolute top-8 left-1/2 -translate-x-1/2 text-primary-foreground font-bold text-xl">
                   WIN
                 </div>
               </div>
               
               {/* Other segments */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 clip-segment-2">
+              <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-blue-600 clip-segment-2">
                 <div className="absolute top-1/2 right-8 text-white font-bold text-lg rotate-90">
                   SPIN
                 </div>
               </div>
               
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 clip-segment-3">
+              <div className="absolute inset-0 bg-linear-to-br from-purple-500 to-purple-600 clip-segment-3">
                 <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-bold text-lg rotate-180">
                   AGAIN
                 </div>
               </div>
               
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-pink-600 clip-segment-4">
+              <div className="absolute inset-0 bg-linear-to-br from-pink-500 to-pink-600 clip-segment-4">
                 <div className="absolute top-1/2 left-8 text-white font-bold text-lg -rotate-90">
                   TRY
                 </div>
