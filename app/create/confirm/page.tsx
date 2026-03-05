@@ -11,9 +11,11 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 export default function ConfirmPage() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [allocationData, setAllocationData] = useState<any>(null);
   const [envelopeName, setEnvelopeName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -88,8 +90,7 @@ export default function ConfirmPage() {
 
   const handleCopyLink = (link: string, index: number) => {
     navigator.clipboard.writeText(link);
-    // You can add toast notification here
-    alert(`Link untuk ${allocationData.recipients[index].name} telah disalin!`);
+    addToast(`Link untuk ${allocationData.recipients[index].name} telah disalin!`, 'success');
   };
 
   const handleShareLink = async (link: string, recipientName: string) => {

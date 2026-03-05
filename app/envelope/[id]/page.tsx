@@ -15,6 +15,7 @@ import { Footer } from "@/components/layout/footer";
 import { QRScanner } from "@/components/qr/qr-scanner";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 interface Recipient {
   id: string;
@@ -41,6 +42,7 @@ interface EnvelopeData {
 export default function EnvelopeDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { addToast } = useToast();
   const envelopeId = params.id as string;
 
   const [envelope, setEnvelope] = useState<EnvelopeData | null>(null);
@@ -113,7 +115,7 @@ export default function EnvelopeDetailPage() {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     const link = `${baseUrl}/claim/${token}`;
     navigator.clipboard.writeText(link);
-    alert(`Link untuk ${recipientName} telah disalin!`);
+    addToast(`Link untuk ${recipientName} telah disalin!`, 'success');
   };
 
   const handleShareLink = async (token: string, recipientName: string) => {

@@ -20,9 +20,11 @@ import { Footer } from "@/components/layout/footer";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient, AgeLevel, Status, Closeness } from "@/lib/types";
 import { sanitizeText } from "@/lib/security";
+import { useToast } from "@/components/ui/toast";
 
 export default function CreateEnvelopePage() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [step, setStep] = useState(1);
   const [totalBudget, setTotalBudget] = useState("");
   const [budgetError, setBudgetError] = useState("");
@@ -40,7 +42,7 @@ export default function CreateEnvelopePage() {
     // Validate and sanitize name
     const name = sanitizeText(currentRecipient.name, 100);
     if (name.length === 0) {
-      alert('Nama tidak valid');
+      addToast('Nama tidak valid', 'error');
       return;
     }
     
@@ -65,6 +67,8 @@ export default function CreateEnvelopePage() {
       status: "school",
       closeness: "very_close",
     });
+    
+    addToast(`${name} berhasil ditambahkan`, 'success');
   };
 
   const removeRecipient = (id: string) => {
