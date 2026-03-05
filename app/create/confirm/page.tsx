@@ -70,7 +70,7 @@ export default function ConfirmPage() {
       const response: any = await api.createEnvelope({
         envelopeName: envelopeName.trim(),
         totalBudget: allocationData.totalBudget,
-        distributionMode: "CASH",
+        distributionMode: allocationData.distributionMode || "CASH",
         recipients: recipientsData,
       });
 
@@ -221,7 +221,9 @@ export default function ConfirmPage() {
                   <div className="pt-3 border-t border-border space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Mode:</span>
-                      <span className="font-bold text-foreground">Cash (Tunai)</span>
+                      <span className="font-bold text-foreground">
+                        {allocationData.distributionMode === "DIGITAL" ? "Digital (Transfer)" : "Cash (Tunai)"}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Total Budget:</span>

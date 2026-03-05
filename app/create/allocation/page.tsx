@@ -171,8 +171,8 @@ function AllocationContent() {
       })
     );
 
-    // Navigate to confirm page
-    router.push("/create/confirm");
+    // Navigate to mode selection page
+    router.push("/create/mode");
   };
 
   if (error) {
