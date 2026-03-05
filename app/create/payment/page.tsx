@@ -73,6 +73,9 @@ export default function PaymentPage() {
             throw new Error('Invalid payment URL. Silakan hubungi support.');
           }
           
+          // Cleanup sessionStorage before redirect
+          sessionStorage.removeItem("allocationData");
+          
           // Redirect to payment gateway
           window.location.href = paymentUrl;
         } else {

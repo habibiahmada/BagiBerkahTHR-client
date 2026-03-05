@@ -32,11 +32,6 @@ export default function ConfirmPage() {
     } else {
       setError("Data alokasi tidak ditemukan");
     }
-    
-    // Cleanup on unmount
-    return () => {
-      sessionStorage.removeItem("allocationData");
-    };
   }, []);
 
   const handleCreateEnvelope = async () => {
@@ -77,6 +72,9 @@ export default function ConfirmPage() {
         });
         
         setClaimLinks(links);
+        
+        // Cleanup sessionStorage after successful creation
+        sessionStorage.removeItem("allocationData");
       } else {
         throw new Error(response.error?.message || "Gagal membuat amplop");
       }
@@ -119,12 +117,20 @@ export default function ConfirmPage() {
             <Alert variant="error">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-            <Link href="/create/mode" className="mt-4 inline-block">
-              <Button variant="outline">
-                <ArrowLeft className="w-4 h-4" />
-                Kembali
-              </Button>
-            </Link>
+            <div className="mt-4 space-y-2">
+              <Link href="/create/allocation" className="inline-block">
+                <Button variant="outline">
+                  <ArrowLeft className="w-4 h-4" />
+                  Kembali ke Alokasi
+                </Button>
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                Atau mulai dari awal di{" "}
+                <Link href="/create" className="text-primary hover:underline">
+                  halaman pembuatan amplop
+                </Link>
+              </p>
+            </div>
           </div>
         </main>
         <Footer />

@@ -27,6 +27,7 @@ export default function AllocationPage() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [usedFallback, setUsedFallback] = useState(false);
   const [totalBudget, setTotalBudget] = useState(0);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [allocations, setAllocations] = useState<any[]>([]);
@@ -85,6 +86,11 @@ export default function AllocationPage() {
         }));
 
         setAllocations(allocationsData);
+        
+        // Check if fallback was used
+        if (response.data.usedFallback) {
+          setUsedFallback(true);
+        }
       } else {
         throw new Error(response.error?.message || "Gagal mendapatkan alokasi AI");
       }
@@ -243,6 +249,15 @@ export default function AllocationPage() {
                       </Button>
                     </div>
                   </div>
+                  
+                  {/* Fallback Warning */}
+                  {usedFallback && (
+                    <Alert variant="warning" className="mt-4">
+                      <AlertDescription>
+                        <strong>Catatan:</strong> Alokasi ini menggunakan metode berbasis aturan karena layanan AI sedang tidak tersedia. Hasil tetap adil berdasarkan usia, status, dan kedekatan keluarga.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <Tabs value={selectedView} onValueChange={setSelectedView}>
