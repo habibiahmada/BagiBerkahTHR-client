@@ -62,7 +62,7 @@ export function HeroSection() {
                                     <ArrowRight className="w-5 h-5" />
                                 </Button>
                             </Link>
-                            <Link href="/claim/demo">
+                            <Link href="/claim/1e0834720a734e36ea2f5db4b4ec39c16cdcbf619e7295ebdbf59c8c9dee42c2">
                                 <Button variant="outline" size="lg">
                                     Coba Klaim Demo
                                 </Button>
