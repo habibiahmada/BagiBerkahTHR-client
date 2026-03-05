@@ -187,9 +187,9 @@ export default function EnvelopeDetailPage() {
   };
 
   const getPlayableBadge = (playableType: string, gameType?: string) => {
-    if (playableType === "DIRECT") {
+    if (!playableType || playableType === "DIRECT") {
       return <Badge variant="default">Langsung</Badge>;
-    } else if (playableType === "GAME") {
+    } else if (playableType === "GAME" && gameType) {
       const gameNames: Record<string, string> = {
         MEMORY_CARD: "Memory Card",
         SCRATCH_CARD: "Scratch Card",
@@ -199,13 +199,13 @@ export default function EnvelopeDetailPage() {
       };
       return (
         <Badge variant="info">
-          🎮 {gameNames[gameType || ""] || "Game"}
+          🎮 {gameNames[gameType] || gameType.replace(/_/g, " ")}
         </Badge>
       );
     } else if (playableType === "QUIZ") {
       return <Badge variant="info">🧠 Quiz</Badge>;
     }
-    return null;
+    return <Badge variant="default">Langsung</Badge>;
   };
 
   if (error) {
@@ -373,18 +373,16 @@ export default function EnvelopeDetailPage() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-start gap-3">
                         {getStatusIcon(recipient.claim.status, envelope.distributionMode)}
-                        <div>
+                        <div className="flex-1">
                           <h4 className="font-semibold text-foreground">
                             {recipient.name}
                           </h4>
                           <p className="text-sm text-muted-foreground">
                             {formatCurrency(recipient.allocatedAmount)}
                           </p>
-                          {recipient.playableType && (
-                            <div className="flex gap-2 mt-2">
-                              {getPlayableBadge(recipient.playableType, recipient.gameType)}
-                            </div>
-                          )}
+                          <div className="flex gap-2 mt-2">
+                            {getPlayableBadge(recipient.playableType, recipient.gameType)}
+                          </div>
                         </div>
                       </div>
                       {getStatusBadge(recipient.claim.status, envelope.distributionMode)}
