@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Confetti } from "@/components/animations/confetti";
-import { formatCurrency } from "@/lib/utils";
 
 // Import game components
 import { MemoryCard } from "@/components/games/memory-card";
@@ -128,12 +127,6 @@ export default function DemoClaimPage() {
               </p>
             </div>
 
-            <Alert variant="info" className="mb-8">
-              <AlertDescription>
-                Ini adalah demo interaktif. Tidak ada data yang tersimpan dan tidak ada transaksi real.
-              </AlertDescription>
-            </Alert>
-
             <div className="grid gap-4">
               <Card 
                 className="cursor-pointer hover:border-primary transition-colors"
@@ -205,12 +198,6 @@ export default function DemoClaimPage() {
 
       <main className="flex-1 pt-24 pb-12 px-4">
         <div className="container mx-auto max-w-2xl">
-          {/* Demo Badge */}
-          <Alert variant="warning" className="mb-6">
-            <AlertDescription>
-              🎭 Mode Demo - Tidak ada data yang tersimpan
-            </AlertDescription>
-          </Alert>
 
           {/* Envelope Step */}
           {step === "envelope" && (
