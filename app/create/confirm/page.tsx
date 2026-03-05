@@ -374,6 +374,14 @@ export default function ConfirmPage() {
                         <p className="text-sm text-muted-foreground">
                           {formatCurrency(recipient.amount)}
                         </p>
+                        {recipient.playableType !== "DIRECT" && (
+                          <p className="text-xs text-primary mt-1">
+                            {recipient.playableType === "GAME" 
+                              ? `🎮 ${recipient.gameType?.replace(/_/g, " ")}`
+                              : `🧠 Quiz`
+                            }
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-2">
