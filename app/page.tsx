@@ -14,6 +14,8 @@ import { TestimonialsSection } from "@/components/landing/testimonials-section";
 import { TrustSection } from "@/components/landing/trust-section";
 import { FaqSection } from "@/components/landing/faq-section";
 import { CtaSection } from "@/components/landing/cta-section";
+import { StructuredData } from "@/components/seo/structured-data";
+import Head from "next/head";
 
 function SupportDeveloperSection() {
   return (
@@ -61,22 +63,39 @@ function SupportDeveloperSection() {
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <>
+      <Head>
+        <title>BagiBerkah - Platform AI untuk Bagikan THR Lebih Bermakna</title>
+        <meta
+          name="description"
+          content="Platform AI yang membantu keluarga membagikan THR secara adil, personal, dan menyenangkan. Dengan AI allocation, game interaktif, dan transfer otomatis untuk semua usia."
+        />
+        <meta
+          name="keywords"
+          content="THR, Tunjangan Hari Raya, Amplop Digital, AI Allocation, Ramadhan, Idul Fitri, Lebaran, Transfer THR, BagiBerkah"
+        />
+      </Head>
+      
+      <StructuredData type="product" />
+      <StructuredData type="faq" />
+      
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
 
-      <main className="flex-1">
-        <HeroSection />
-        <StatsSection />
-        <FeaturesSection />
-        <StepsSection />
-        <TestimonialsSection />
-        <TrustSection />
-        <FaqSection />
-        <SupportDeveloperSection />
-        <CtaSection />
-      </main>
+        <main className="flex-1">
+          <HeroSection />
+          <StatsSection />
+          <FeaturesSection />
+          <StepsSection />
+          <TestimonialsSection />
+          <TrustSection />
+          <FaqSection />
+          <SupportDeveloperSection />
+          <CtaSection />
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   );
 }

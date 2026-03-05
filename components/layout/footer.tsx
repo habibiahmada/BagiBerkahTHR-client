@@ -80,7 +80,7 @@ export function Footer() {
 
                 <div className="border-t border-border pt-6 text-center">
                     <p className="text-sm text-muted-foreground">
-                        © 2026 BagiBerkah. by <a href="https://habibiahmada.dev">habibiahmada.dev</a> Membuat setiap THR lebih bermakna 🌙
+                        © 2026 BagiBerkah. by <Link href="https://habibiahmada.dev" className="underline text-blue-800">habibiahmada.dev</Link> Membuat setiap THR lebih bermakna 🌙
                     </p>
                 </div>
             </div>

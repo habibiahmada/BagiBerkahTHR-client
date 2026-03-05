@@ -4,8 +4,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Head from "next/head";
 import { Heart } from "lucide-react";
 import { ToastProvider } from "@/components/ui/toast";
+import { StructuredData } from "@/components/seo/structured-data";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,9 +26,20 @@ export default function RootLayout({
 
   return (
     <html lang="id">
+      <Head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="theme-color" content="#10b981" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+      </Head>
       <body
         className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >
+        <StructuredData type="website" />
+        <StructuredData type="organization" />
+        
         <ToastProvider>
           {children}
           
