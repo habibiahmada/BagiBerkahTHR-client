@@ -19,6 +19,7 @@ export default function ConfirmPage() {
   const [allocationData, setAllocationData] = useState<any>(null);
   const [envelopeName, setEnvelopeName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [envelope, setEnvelope] = useState<any>(null);
   const [claimLinks, setClaimLinks] = useState<string[]>([]);
@@ -48,6 +49,38 @@ export default function ConfirmPage() {
     setError(null);
 
     try {
+      // Generate quiz questions for recipients with QUIZ playable type
+      const recipientsWithQuiz = allocationData.recipients.filter(
+        (r: any) => r.playableType === "QUIZ"
+      );
+
+      if (recipientsWithQuiz.length > 0) {
+        setGeneratingQuiz(true);
+        
+        // Generate quiz for each recipient
+        for (const recipient of recipientsWithQuiz) {
+          try {
+            const quizResponse: any = await api.generateQuiz({
+              topic: recipient.quizTopic,
+              difficulty: recipient.quizDifficulty,
+              count: 5,
+            });
+
+            if (quizResponse.success) {
+              recipient.quizQuestions = quizResponse.data.questions;
+            } else {
+              throw new Error(`Gagal generate quiz untuk ${recipient.name}`);
+            }
+          } catch (quizError: any) {
+            console.error(`Quiz generation error for ${recipient.name}:`, quizError);
+            throw new Error(`Gagal membuat quiz untuk ${recipient.name}: ${quizError.message}`);
+          }
+        }
+        
+        setGeneratingQuiz(false);
+      }
+
+      // Create envelope with playable data
       const response: any = await api.createEnvelope({
         envelopeName: envelopeName.trim(),
         totalBudget: allocationData.totalBudget,
@@ -61,6 +94,12 @@ export default function ConfirmPage() {
           aiReasoning: r.reasoning,
           aiGreeting: r.greeting || "",
           greetingContext: r.greetingContext || "",
+          // Playable data
+          playableType: r.playableType,
+          gameType: r.gameType,
+          quizTopic: r.quizTopic,
+          quizDifficulty: r.quizDifficulty,
+          quizQuestions: r.quizQuestions,
         })),
       });
 
@@ -85,6 +124,7 @@ export default function ConfirmPage() {
       setError(err.message || "Terjadi kesalahan saat membuat amplop");
     } finally {
       setLoading(false);
+      setGeneratingQuiz(false);
     }
   };
 
@@ -246,6 +286,14 @@ export default function ConfirmPage() {
                         <p className="text-sm text-muted-foreground">
                           {recipient.ageLevel} • {recipient.status}
                         </p>
+                        {recipient.playableType !== "DIRECT" && (
+                          <p className="text-xs text-primary mt-1">
+                            {recipient.playableType === "GAME" 
+                              ? `🎮 Game: ${recipient.gameType?.replace(/_/g, " ")}`
+                              : `🧠 Quiz: ${recipient.quizTopic}`
+                            }
+                          </p>
+                        )}
                       </div>
                       <p className="font-bold text-primary">
                         {formatCurrency(recipient.amount)}
@@ -278,7 +326,7 @@ export default function ConfirmPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Membuat Amplop...
+                    {generatingQuiz ? "Membuat Quiz..." : "Membuat Amplop..."}
                   </>
                 ) : (
                   <>

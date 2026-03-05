@@ -88,6 +88,18 @@ class ApiClient {
     });
   }
 
+  // Quiz APIs
+  async generateQuiz(data: {
+    topic: string;
+    difficulty: string;
+    count?: number;
+  }) {
+    return this.request('/ai/generate-quiz', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // Claim APIs
   async getClaim(token: string) {
     return this.request(`/claims/${token}`);
