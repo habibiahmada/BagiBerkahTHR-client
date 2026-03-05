@@ -25,6 +25,7 @@ export default function CreateEnvelopePage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [totalBudget, setTotalBudget] = useState("");
+  const [budgetError, setBudgetError] = useState("");
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [currentRecipient, setCurrentRecipient] = useState<Partial<Recipient>>({
     name: "",
@@ -72,6 +73,21 @@ export default function CreateEnvelopePage() {
 
   const handleNext = () => {
     if (step === 1 && totalBudget) {
+      const budget = Number(totalBudget);
+      
+      // Validate minimum budget
+      if (budget < 10000) {
+        setBudgetError("Budget minimal adalah Rp 10.000");
+        return;
+      }
+      
+      // Validate maximum budget (1 billion)
+      if (budget > 1000000000) {
+        setBudgetError("Budget maksimal adalah Rp 1.000.000.000");
+        return;
+      }
+      
+      setBudgetError("");
       setStep(2);
     } else if (step === 2 && recipients.length > 0) {
       // Navigate to AI allocation page
@@ -137,17 +153,41 @@ export default function CreateEnvelopePage() {
                     type="number"
                     placeholder="Contoh: 1000000"
                     value={totalBudget}
-                    onChange={(e) => setTotalBudget(e.target.value)}
+                    min={10000}
+                    step={1000}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow integers
+                      if (value === '' || /^\d+$/.test(value)) {
+                        setTotalBudget(value);
+                        setBudgetError(""); // Clear error on change
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      // Prevent decimal point and minus
+                      if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E') {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                   {totalBudget && (
                     <p className="text-sm text-muted-foreground mt-2">
                       Total: {formatCurrency(Number(totalBudget))}
                     </p>
                   )}
+                  {budgetError && (
+                    <p className="text-sm text-red-600 mt-2">
+                      {budgetError}
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Minimal Rp 10.000 - Maksimal Rp 1.000.000.000
+                  </p>
                 </div>
                 <Button
                   onClick={handleNext}
-                  disabled={!totalBudget || Number(totalBudget) <= 0}
+                  disabled={!totalBudget || Number(totalBudget) < 10000 || Number(totalBudget) > 1000000000}
                   className="w-full"
                 >
                   Lanjut ke Penerima →

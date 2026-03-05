@@ -41,10 +41,19 @@ export function ManualEditModal({
   const isValid = difference === 0;
 
   const handleAmountChange = (index: number, value: string) => {
-    const amount = parseInt(value) || 0;
-    const updated = [...editedRecipients];
-    updated[index] = { ...updated[index], amount };
-    setEditedRecipients(updated);
+    // Only allow integers
+    if (value === '' || /^\d+$/.test(value)) {
+      const amount = parseInt(value) || 0;
+      
+      // Validate minimum amount per recipient (at least 1000)
+      if (amount > 0 && amount < 1000) {
+        return; // Don't update if less than 1000
+      }
+      
+      const updated = [...editedRecipients];
+      updated[index] = { ...updated[index], amount };
+      setEditedRecipients(updated);
+    }
   };
 
   const handleSave = () => {
@@ -125,8 +134,16 @@ export function ManualEditModal({
                   id={`amount-${index}`}
                   type="number"
                   value={recipient.amount}
+                  min={1000}
+                  step={1000}
                   onChange={(e) => handleAmountChange(index, e.target.value)}
-                  placeholder="Nominal"
+                  onKeyDown={(e) => {
+                    // Prevent decimal point and minus
+                    if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E') {
+                      e.preventDefault();
+                    }
+                  }}
+                  placeholder="Minimal Rp 1.000"
                 />
               </div>
             ))}
