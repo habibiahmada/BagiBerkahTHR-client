@@ -72,6 +72,8 @@ interface Supporter {
 export default function SupportPage() {
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [donorName, setDonorName] = useState("");
+  const [donorEmail, setDonorEmail] = useState("");
+  const [donorPhone, setDonorPhone] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +123,18 @@ export default function SupportPage() {
 
   const handleDonate = async (tierIndex: number) => {
     setError(null);
+
+    // Validate email and phone
+    if (!donorEmail || !donorEmail.includes('@')) {
+      setError("Email wajib diisi dengan format yang benar");
+      return;
+    }
+
+    if (!donorPhone || donorPhone.length < 10) {
+      setError("Nomor telepon wajib diisi minimal 10 digit");
+      return;
+    }
+
     setLoading(true);
     setSelectedTier(tierIndex);
 
@@ -130,6 +144,8 @@ export default function SupportPage() {
       const response: any = await api.createDonation({
         amount: tier.amount,
         donorName: donorName || undefined,
+        donorEmail: donorEmail,
+        donorPhone: donorPhone,
         message: message || undefined,
       });
 
@@ -185,9 +201,9 @@ export default function SupportPage() {
             <div className="max-w-2xl mx-auto mb-12">
               <Card>
                 <CardHeader>
-                  <CardTitle>Info Donatur (Opsional)</CardTitle>
+                  <CardTitle>Info Donatur</CardTitle>
                   <CardDescription>
-                    Isi jika ingin nama Anda ditampilkan di daftar supporter
+                    Email dan nomor telepon diperlukan untuk konfirmasi pembayaran
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -205,7 +221,39 @@ export default function SupportPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="message">Pesan Dukungan</Label>
+                    <Label htmlFor="donorEmail">Email</Label>
+                    <Input
+                      id="donorEmail"
+                      type="email"
+                      placeholder="email@example.com"
+                      value={donorEmail}
+                      onChange={(e) => setDonorEmail(e.target.value)}
+                      maxLength={100}
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Diperlukan untuk konfirmasi pembayaran
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="donorPhone">Nomor Telepon</Label>
+                    <Input
+                      id="donorPhone"
+                      type="tel"
+                      placeholder="08123456789"
+                      value={donorPhone}
+                      onChange={(e) => setDonorPhone(e.target.value)}
+                      maxLength={15}
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Diperlukan untuk konfirmasi pembayaran
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="message">Pesan Dukungan (Opsional)</Label>
                     <textarea
                       id="message"
                       placeholder="Tulis pesan dukungan..."

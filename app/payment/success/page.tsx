@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle, Home, Eye } from "lucide-react";
+import { CheckCircle, Home, Eye, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -43,8 +43,11 @@ function PaymentSuccessContent() {
     try {
       const response: any = await api.getEnvelope(envId);
 
-      if (response.success && response.data.payment) {
-        setPaymentData(response.data.payment);
+      if (response.success) {
+        setPaymentData({
+          ...response.data.payment,
+          envelope: response.data, // Include full envelope data
+        });
       } else {
         throw new Error("Payment tidak ditemukan");
       }
@@ -143,38 +146,71 @@ function PaymentSuccessContent() {
 
           {/* Payment Details */}
           {paymentData && (
-            <Card className="mb-6">
-              <CardContent className="pt-6">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Payment ID:</span>
-                    <span className="font-mono text-sm text-foreground">
-                      {paymentData.paymentId}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Jumlah:</span>
-                    <span className="font-bold text-primary text-xl">
-                      {formatCurrency(paymentData.amount)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
-                    <span className="font-semibold text-green-600">
-                      {paymentData.status}
-                    </span>
-                  </div>
-                  {paymentData.paidAt && (
+            <>
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    {paymentData.envelope?.accessCode && (
+                      <div className="p-4 bg-primary/5 border-2 border-primary/20 rounded-lg mb-4">
+                        <div className="text-center">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Kode Amplop Anda
+                          </p>
+                          <div className="flex items-center justify-center gap-2">
+                            <p className="text-3xl font-bold text-primary tracking-wider font-mono">
+                              {paymentData.envelope.accessCode}
+                            </p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(paymentData.envelope.accessCode);
+                                  alert('Kode amplop berhasil disalin!');
+                                } catch (err) {
+                                  console.error('Failed to copy:', err);
+                                }
+                              }}
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Simpan kode ini untuk mengakses amplop Anda
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Dibayar pada:</span>
-                      <span className="text-foreground">
-                        {new Date(paymentData.paidAt).toLocaleString("id-ID")}
+                      <span className="text-muted-foreground">Payment ID:</span>
+                      <span className="font-mono text-sm text-foreground">
+                        {paymentData.paymentId}
                       </span>
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Jumlah:</span>
+                      <span className="font-bold text-primary text-xl">
+                        {formatCurrency(paymentData.amount)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status:</span>
+                      <span className="font-semibold text-green-600">
+                        {paymentData.status}
+                      </span>
+                    </div>
+                    {paymentData.paidAt && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Dibayar pada:</span>
+                        <span className="text-foreground">
+                          {new Date(paymentData.paidAt).toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
           )}
 
           {/* Next Steps */}

@@ -124,6 +124,8 @@ class ApiClient {
   async createDonation(data: {
     amount: number;
     donorName?: string;
+    donorEmail?: string;
+    donorPhone?: string;
     message?: string;
   }) {
     return this.request('/donations/create', {
