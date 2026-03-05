@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Home, Eye } from "lucide-react";
@@ -13,7 +13,7 @@ import { Footer } from "@/components/layout/footer";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paymentId = searchParams.get("payment_id");
@@ -237,5 +237,24 @@ export default function PaymentSuccessPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-2xl">
+            <Skeleton className="h-48 w-full mb-6" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

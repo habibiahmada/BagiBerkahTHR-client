@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { XCircle, Home, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
-export default function PaymentFailedPage() {
+function PaymentFailedContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const paymentId = searchParams.get("payment_id");
@@ -126,5 +127,24 @@ export default function PaymentFailedPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function PaymentFailedPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 pt-24 pb-12">
+          <div className="container mx-auto px-4 max-w-2xl">
+            <Skeleton className="h-48 w-full mb-6" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <PaymentFailedContent />
+    </Suspense>
   );
 }
