@@ -15,6 +15,7 @@ import { formatCurrency } from "@/lib/utils";
 export default function ConfirmPage() {
   const router = useRouter();
   const [allocationData, setAllocationData] = useState<any>(null);
+  const [envelopeName, setEnvelopeName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [envelope, setEnvelope] = useState<any>(null);
@@ -35,12 +36,18 @@ export default function ConfirmPage() {
 
   const handleCreateEnvelope = async () => {
     if (!allocationData) return;
+    
+    if (!envelopeName.trim()) {
+      setError("Nama amplop wajib diisi");
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       const response: any = await api.createEnvelope({
+        envelopeName: envelopeName.trim(),
         totalBudget: allocationData.totalBudget,
         distributionMode: "CASH",
         recipients: allocationData.recipients.map((r: any) => ({
@@ -162,22 +169,41 @@ export default function ConfirmPage() {
                 <CardTitle>Ringkasan Amplop</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Mode:</span>
-                    <span className="font-bold text-foreground">Cash (Tunai)</span>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-foreground mb-2 block">
+                      Nama Amplop
+                    </label>
+                    <input
+                      type="text"
+                      value={envelopeName}
+                      onChange={(e) => setEnvelopeName(e.target.value)}
+                      placeholder="Contoh: THR Lebaran 2026"
+                      maxLength={100}
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Nama ini akan memudahkan Anda mengidentifikasi amplop
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Budget:</span>
-                    <span className="font-bold text-foreground">
-                      {formatCurrency(allocationData.totalBudget)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Jumlah Penerima:</span>
-                    <span className="font-bold text-foreground">
-                      {allocationData.recipients.length} orang
-                    </span>
+                  
+                  <div className="pt-3 border-t border-border space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Mode:</span>
+                      <span className="font-bold text-foreground">Cash (Tunai)</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Budget:</span>
+                      <span className="font-bold text-foreground">
+                        {formatCurrency(allocationData.totalBudget)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Jumlah Penerima:</span>
+                      <span className="font-bold text-foreground">
+                        {allocationData.recipients.length} orang
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -225,7 +251,7 @@ export default function ConfirmPage() {
               </Button>
               <Button
                 onClick={handleCreateEnvelope}
-                disabled={loading}
+                disabled={loading || !envelopeName.trim()}
                 size="lg"
               >
                 {loading ? (
@@ -266,6 +292,27 @@ export default function ConfirmPage() {
               interaktif sebelum melihat nominal dan QR code untuk validasi.
             </AlertDescription>
           </Alert>
+
+          <Card className="mb-8 border-primary">
+            <CardHeader>
+              <CardTitle>Kode Akses Amplop</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="p-6 bg-primary-lighter rounded-xl text-center">
+                  <p className="text-sm text-muted-foreground mb-2">Kode Akses Anda:</p>
+                  <p className="text-4xl font-bold font-mono text-primary tracking-wider">
+                    {envelope.accessCode}
+                  </p>
+                </div>
+                <Alert variant="info">
+                  <AlertDescription>
+                    <strong>Simpan kode ini!</strong> Gunakan kode akses untuk mengecek status amplop kapan saja di halaman Dashboard.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="mb-8">
             <CardHeader>
@@ -319,9 +366,9 @@ export default function ConfirmPage() {
           <div className="flex justify-end gap-3">
             <Button
               variant="outline"
-              onClick={() => router.push(`/envelope/${envelope.id}`)}
+              onClick={() => router.push("/dashboard")}
             >
-              Lihat Dashboard
+              Cek Status Amplop
             </Button>
             <Button onClick={() => router.push("/")}>
               Kembali ke Home

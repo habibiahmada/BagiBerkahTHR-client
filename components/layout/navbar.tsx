@@ -27,7 +27,7 @@ export function Navbar() {
                             size="sm"
                         >
                             <LayoutDashboard className="w-4 h-4" />
-                            <span className="hidden sm:inline">Dashboard</span>
+                            <span className="hidden sm:inline">Cek Status</span>
                         </Button>
                     </Link>
                     <Link href="/create">

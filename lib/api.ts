@@ -58,6 +58,13 @@ class ApiClient {
     });
   }
 
+  async checkEnvelope(accessCode: string) {
+    return this.request('/envelopes/check', {
+      method: 'POST',
+      body: JSON.stringify({ accessCode }),
+    });
+  }
+
   async getEnvelope(id: string) {
     return this.request(`/envelopes/${id}`);
   }

@@ -30,6 +30,7 @@ interface Recipient {
 
 interface EnvelopeData {
   id: string;
+  envelopeName: string;
   totalBudget: number;
   distributionMode: string;
   status: string;
@@ -227,15 +228,8 @@ export default function EnvelopeDetailPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Header */}
           <div className="mb-8">
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Kembali ke Dashboard
-            </Link>
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Detail Amplop
+              {envelope.envelopeName || "Detail Amplop"}
             </h1>
             <p className="text-muted-foreground">
               Kelola dan pantau status klaim penerima
@@ -405,7 +399,7 @@ export default function EnvelopeDetailPage() {
                 <Alert variant="success">
                   <CheckCircle className="w-4 h-4" />
                   <AlertDescription>
-                    <p className="font-semibold mb-1">Validasi Berhasil!</p>
+                    <span className="font-semibold mb-1">Validasi Berhasil!</span>
                     <p>
                       {scanResult.recipientName} - {formatCurrency(scanResult.amount)}
                     </p>
