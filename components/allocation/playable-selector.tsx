@@ -5,7 +5,6 @@ import { Gamepad2, Brain, Zap, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type PlayableType = "DIRECT" | "GAME" | "QUIZ";
@@ -34,6 +33,14 @@ const GAME_OPTIONS = [
   { value: "TREASURE_HUNT", label: "Treasure Hunt 🗺️", desc: "Cari harta karun" },
 ];
 
+const QUIZ_TEMPLATES = [
+  { value: "pengetahuan-umum-mudah", label: "Pengetahuan Umum", desc: "Pertanyaan umum sehari-hari" },
+  { value: "sejarah-indonesia-mudah", label: "Sejarah Indonesia", desc: "Sejarah kemerdekaan Indonesia" },
+  { value: "agama-islam-mudah", label: "Agama Islam", desc: "Pertanyaan dasar Islam" },
+  { value: "matematika-mudah", label: "Matematika Dasar", desc: "Soal matematika sederhana" },
+  { value: "sains-mudah", label: "Sains & Alam", desc: "Pertanyaan sains dan alam" },
+];
+
 export function PlayableSelector({ recipientName, config, onChange }: PlayableSelectorProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -50,8 +57,8 @@ export function PlayableSelector({ recipientName, config, onChange }: PlayableSe
 
     // Set default quiz settings if QUIZ selected
     if (type === "QUIZ") {
-      if (!config.quizTopic) newConfig.quizTopic = "";
-      if (!config.quizDifficulty) newConfig.quizDifficulty = "MEDIUM";
+      if (!config.quizTopic) newConfig.quizTopic = "pengetahuan-umum-mudah";
+      if (!config.quizDifficulty) newConfig.quizDifficulty = "EASY";
     }
 
     onChange(newConfig);
@@ -74,7 +81,8 @@ export function PlayableSelector({ recipientName, config, onChange }: PlayableSe
         const game = GAME_OPTIONS.find(g => g.value === config.gameType);
         return game ? game.label : "Game";
       case "QUIZ":
-        return `Quiz: ${config.quizTopic || "Belum diatur"}`;
+        const quiz = QUIZ_TEMPLATES.find(q => q.value === config.quizTopic);
+        return quiz ? `Quiz: ${quiz.label}` : "Quiz";
       default:
         return "Langsung";
     }
@@ -195,12 +203,11 @@ export function PlayableSelector({ recipientName, config, onChange }: PlayableSe
               <div className="space-y-3">
                 <div>
                   <Label htmlFor={`topic-${recipientName}`} className="text-xs">
-                    Topik Quiz
+                    Pilih Topik Quiz
                   </Label>
-                  <Input
+                  <Select
                     id={`topic-${recipientName}`}
-                    placeholder="Contoh: Sejarah Indonesia"
-                    value={config.quizTopic || ""}
+                    value={config.quizTopic || "pengetahuan-umum-mudah"}
                     onChange={(e) =>
                       onChange({
                         ...config,
@@ -208,27 +215,16 @@ export function PlayableSelector({ recipientName, config, onChange }: PlayableSe
                       })
                     }
                     className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor={`difficulty-${recipientName}`} className="text-xs">
-                    Tingkat Kesulitan
-                  </Label>
-                  <Select
-                    id={`difficulty-${recipientName}`}
-                    value={config.quizDifficulty || "MEDIUM"}
-                    onChange={(e) =>
-                      onChange({
-                        ...config,
-                        quizDifficulty: e.target.value as QuizDifficulty,
-                      })
-                    }
-                    className="mt-1"
                   >
-                    <option value="EASY">Mudah</option>
-                    <option value="MEDIUM">Sedang</option>
-                    <option value="HARD">Sulit</option>
+                    {QUIZ_TEMPLATES.map((quiz) => (
+                      <option key={quiz.value} value={quiz.value}>
+                        {quiz.label} - {quiz.desc}
+                      </option>
+                    ))}
                   </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Quiz berisi 5 pertanyaan pilihan ganda
+                  </p>
                 </div>
               </div>
             )}

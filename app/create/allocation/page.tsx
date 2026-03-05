@@ -162,16 +162,6 @@ function AllocationContent() {
   };
 
   const handleConfirm = () => {
-    // Validate quiz topics if any
-    const hasInvalidQuiz = allocations.some(
-      (a) => a.playableType === "QUIZ" && !a.quizTopic?.trim()
-    );
-
-    if (hasInvalidQuiz) {
-      setError("Harap isi topik quiz untuk semua penerima yang memilih mode Quiz");
-      return;
-    }
-
     // Save to sessionStorage
     sessionStorage.setItem(
       "allocationData",
