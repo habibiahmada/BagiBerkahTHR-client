@@ -2,24 +2,30 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { BankAccountForm } from "@/components/claim/bank-account-form";
-import { QRDisplayCard } from "@/components/qr/qr-display-card";
-import { ClaimSuccess } from "@/components/claim/claim-success";
 import { Confetti } from "@/components/animations/confetti";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
+
+// Import game components
+import { MemoryCard } from "@/components/games/memory-card";
+import { ScratchCard } from "@/components/games/scratch-card";
+import { SpinWheel } from "@/components/games/spin-wheel";
+import { BalloonPop } from "@/components/games/balloon-pop";
+import { TreasureHunt } from "@/components/games/treasure-hunt";
+import { QuizGame } from "@/components/quiz/quiz-game";
+
+// Import claim components
+import { EnvelopeView } from "@/components/claim/envelope-view";
+import { RevealView } from "@/components/claim/reveal-view";
+import { MethodSelection } from "@/components/claim/method-selection";
+import { ClaimSuccess } from "@/components/claim/claim-success";
+import { QRDisplayCard } from "@/components/qr/qr-display-card";
+
+type Step = "loading" | "envelope" | "playable" | "reveal" | "method" | "claimed";
+type PlayableType = "DIRECT" | "GAME" | "QUIZ";
+type GameType = "MEMORY_CARD" | "SCRATCH_CARD" | "SPIN_WHEEL" | "BALLOON_POP" | "TREASURE_HUNT";
 
 interface ClaimData {
   recipientName: string;
@@ -29,15 +35,17 @@ interface ClaimData {
   status: string;
   qrToken?: string;
   expiresAt?: string;
+  playableType: PlayableType;
+  gameType?: GameType;
+  quizQuestions?: any[];
+  gameCompleted: boolean;
 }
 
 export default function ClaimPage() {
   const params = useParams();
   const token = params.token as string;
 
-  const [step, setStep] = useState<
-    "loading" | "envelope" | "quiz" | "reveal" | "method" | "claimed"
-  >("loading");
+  const [step, setStep] = useState<Step>("loading");
   const [claimData, setClaimData] = useState<ClaimData | null>(null);
   const [envelopeOpened, setEnvelopeOpened] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<"digital" | "cash" | null>(null);
@@ -55,7 +63,7 @@ export default function ClaimPage() {
       const response: any = await api.getClaim(token);
       
       if (response.success) {
-        setClaimData({
+        const data = {
           recipientName: response.data.recipientName,
           amount: response.data.amount,
           greeting: response.data.greeting,
@@ -63,24 +71,21 @@ export default function ClaimPage() {
           status: response.data.status,
           qrToken: response.data.qrToken,
           expiresAt: response.data.expiresAt,
-        });
+          playableType: response.data.playableType || "DIRECT",
+          gameType: response.data.gameType,
+          quizQuestions: response.data.quizQuestions,
+          gameCompleted: response.data.gameCompleted || false,
+        };
+        
+        setClaimData(data);
         
         // Check if already claimed/validated
-        if (response.data.status === "VALIDATED") {
+        if (response.data.status === "VALIDATED" || response.data.status === "CLAIMED") {
           setStep("claimed");
           setClaimResult({
             ...response.data,
             claimMethod: response.data.claimMethod || 'cash',
           });
-        } else if (response.data.status === "CLAIMED") {
-          // Already submitted, show appropriate view based on claimMethod
-          const method = response.data.claimMethod || 'digital';
-          setSelectedMethod(method);
-          setClaimResult({
-            ...response.data,
-            claimMethod: method,
-          });
-          setStep("claimed");
         } else {
           setStep("envelope");
         }
@@ -96,11 +101,25 @@ export default function ClaimPage() {
   const handleOpenEnvelope = () => {
     setEnvelopeOpened(true);
     setTimeout(() => {
-      setStep("quiz");
+      // Check if needs playable (game/quiz)
+      if (claimData && claimData.playableType !== "DIRECT" && !claimData.gameCompleted) {
+        setStep("playable");
+      } else {
+        setStep("reveal");
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 3000);
+      }
     }, 1500);
   };
 
-  const handleQuizAnswer = () => {
+  const handlePlayableComplete = async () => {
+    // Mark game as completed
+    try {
+      await api.completeGame(token);
+    } catch (err) {
+      console.error("Failed to mark game complete:", err);
+    }
+
     setStep("reveal");
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3000);
@@ -170,6 +189,36 @@ export default function ClaimPage() {
     }
   };
 
+  const renderPlayable = () => {
+    if (!claimData) return null;
+
+    if (claimData.playableType === "GAME") {
+      switch (claimData.gameType) {
+        case "MEMORY_CARD":
+          return <MemoryCard onComplete={handlePlayableComplete} />;
+        case "SCRATCH_CARD":
+          return <ScratchCard onComplete={handlePlayableComplete} />;
+        case "SPIN_WHEEL":
+          return <SpinWheel onComplete={handlePlayableComplete} />;
+        case "BALLOON_POP":
+          return <BalloonPop onComplete={handlePlayableComplete} />;
+        case "TREASURE_HUNT":
+          return <TreasureHunt onComplete={handlePlayableComplete} />;
+        default:
+          return <ScratchCard onComplete={handlePlayableComplete} />;
+      }
+    } else if (claimData.playableType === "QUIZ" && claimData.quizQuestions) {
+      return (
+        <QuizGame
+          questions={claimData.quizQuestions}
+          onComplete={handlePlayableComplete}
+        />
+      );
+    }
+
+    return null;
+  };
+
   if (error && step === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -201,168 +250,35 @@ export default function ClaimPage() {
         <div className="container mx-auto max-w-2xl">
           {/* Envelope Step */}
           {step === "envelope" && claimData && (
-            <div className="text-center space-y-8">
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  THR untuk {claimData.recipientName}
-                </h1>
-                <p className="text-muted-foreground">
-                  Ada amplop THR untukmu! Tap untuk membuka
-                </p>
-              </div>
-
-              <div
-                className={`relative mx-auto w-64 h-80 cursor-pointer transition-transform duration-500 ${
-                  envelopeOpened ? "scale-110 rotate-6" : "hover:scale-105"
-                }`}
-                onClick={handleOpenEnvelope}
-              >
-                <div className="absolute inset-0 bg-gradient-hero rounded-3xl shadow-elevated flex items-center justify-center">
-                  <div className="text-primary-foreground text-center">
-                    <div className="text-6xl mb-4">✉️</div>
-                    <p className="text-xl font-semibold">Tap untuk buka</p>
-                  </div>
-                </div>
-              </div>
-
-              {!envelopeOpened && (
-                <p className="text-sm text-muted-foreground">
-                  Ketuk amplop untuk membukanya
-                </p>
-              )}
-            </div>
+            <EnvelopeView
+              recipientName={claimData.recipientName}
+              envelopeOpened={envelopeOpened}
+              onOpen={handleOpenEnvelope}
+            />
           )}
 
-          {/* Quiz Step */}
-          {step === "quiz" && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-center">
-                  Mini Quiz Ramadhan 🌙
-                </CardTitle>
-                <CardDescription className="text-center">
-                  Pilih jawaban yang menurutmu benar
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <p className="text-lg mb-4 text-foreground">
-                    Bulan Ramadhan adalah bulan ke berapa dalam kalender
-                    Hijriyah?
-                  </p>
-                  <div className="space-y-2">
-                    <QuizOption
-                      label="A. Bulan ke-8"
-                      onClick={handleQuizAnswer}
-                    />
-                    <QuizOption
-                      label="B. Bulan ke-9"
-                      onClick={handleQuizAnswer}
-                      correct
-                    />
-                    <QuizOption
-                      label="C. Bulan ke-10"
-                      onClick={handleQuizAnswer}
-                    />
-                    <QuizOption
-                      label="D. Bulan ke-11"
-                      onClick={handleQuizAnswer}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {/* Playable Step (Game or Quiz) */}
+          {step === "playable" && renderPlayable()}
 
           {/* Reveal Step */}
           {step === "reveal" && claimData && (
-            <div className="text-center space-y-8">
-              <div className="animate-bounce">
-                <div className="text-8xl mb-4">🎉</div>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Selamat!</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="p-6 bg-primary-lighter rounded-2xl">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Kamu menerima
-                    </p>
-                    <p className="text-5xl font-bold text-primary mb-4">
-                      {formatCurrency(claimData.amount)}
-                    </p>
-                    <div className="p-4 bg-card rounded-xl">
-                      <p className="text-foreground italic">
-                        &ldquo;{claimData.greeting}&rdquo;
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button onClick={handleRevealNext} className="w-full" size="lg">
-                    Lanjutkan untuk Klaim
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            <RevealView
+              amount={claimData.amount}
+              greeting={claimData.greeting}
+              onNext={handleRevealNext}
+            />
           )}
 
           {/* Method Selection Step */}
           {step === "method" && claimData && (
-            <div className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">
-                  Pilih Metode Penerimaan
-                </h2>
-                <p className="text-muted-foreground">
-                  Bagaimana Anda ingin menerima THR?
-                </p>
-              </div>
-
-              {claimData.distributionMode === "DIGITAL" ? (
-                <Tabs value={selectedMethod || "digital"} onValueChange={(v) => handleMethodSelect(v as any)}>
-                  <TabsList className="w-full">
-                    <TabsTrigger value="digital" className="flex-1">
-                      Transfer Bank
-                    </TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="digital" className="mt-6">
-                    {error && (
-                      <Alert variant="error" className="mb-4">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-                    <BankAccountForm
-                      onSubmit={handleDigitalClaim}
-                      loading={submitting}
-                    />
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="space-y-4">
-                  {error && (
-                    <Alert variant="error">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-                  <Alert variant="info">
-                    <AlertDescription>
-                      Mode Cash: Anda akan mendapatkan QR code untuk divalidasi saat bertemu pengirim.
-                    </AlertDescription>
-                  </Alert>
-                  <Button
-                    onClick={() => handleMethodSelect("cash")}
-                    disabled={submitting}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {submitting ? "Memproses..." : "Generate QR Code"}
-                  </Button>
-                </div>
-              )}
-            </div>
+            <MethodSelection
+              distributionMode={claimData.distributionMode}
+              selectedMethod={selectedMethod}
+              onMethodSelect={handleMethodSelect}
+              onDigitalSubmit={handleDigitalClaim}
+              submitting={submitting}
+              error={error}
+            />
           )}
 
           {/* Claimed Step */}
@@ -395,24 +311,5 @@ export default function ClaimPage() {
       {/* Confetti Effect */}
       <Confetti active={showConfetti} />
     </div>
-  );
-}
-
-function QuizOption({
-  label,
-  onClick,
-  correct,
-}: {
-  label: string;
-  onClick: () => void;
-  correct?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full p-4 text-left rounded-xl border-2 border-border text-foreground hover:border-primary hover:bg-primary-lighter transition-colors cursor-pointer"
-    >
-      {label}
-    </button>
   );
 }

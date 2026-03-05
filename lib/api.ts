@@ -120,6 +120,12 @@ class ApiClient {
     });
   }
 
+  async completeGame(token: string) {
+    return this.request(`/claims/${token}/complete-game`, {
+      method: 'POST',
+    });
+  }
+
   // Payment APIs
   async createPayment(envelopeId: string) {
     return this.request(`/payments/create`, {
