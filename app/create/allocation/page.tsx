@@ -20,6 +20,23 @@ import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient } from "@/lib/types";
 
+import { PlayableSelector } from "@/components/allocation/playable-selector";
+
+interface AllocationWithPlayable {
+  name: string;
+  amount: number;
+  reasoning: string;
+  ageLevel: string;
+  status: string;
+  closeness: string;
+  greetingContext?: string;
+  playableType: "DIRECT" | "GAME" | "QUIZ";
+  gameType?: string;
+  playableReasoning?: string;
+  quizTopic?: string;
+  quizDifficulty?: string;
+}
+
 function AllocationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -29,7 +46,7 @@ function AllocationContent() {
   const [usedFallback, setUsedFallback] = useState(false);
   const [totalBudget, setTotalBudget] = useState(0);
   const [recipients, setRecipients] = useState<Recipient[]>([]);
-  const [allocations, setAllocations] = useState<any[]>([]);
+  const [allocations, setAllocations] = useState<AllocationWithPlayable[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedView, setSelectedView] = useState("pie");
 
@@ -82,6 +99,12 @@ function AllocationContent() {
           status: recipientsData[alloc.recipientIndex].status,
           closeness: recipientsData[alloc.recipientIndex].closeness,
           greetingContext: recipientsData[alloc.recipientIndex].greetingContext,
+          // Playable data from AI
+          playableType: alloc.playableType || "DIRECT",
+          gameType: alloc.gameType,
+          playableReasoning: alloc.playableReasoning,
+          quizTopic: alloc.quizTopic || "",
+          quizDifficulty: alloc.quizDifficulty || "MEDIUM",
         }));
 
         setAllocations(allocationsData);
@@ -126,15 +149,40 @@ function AllocationContent() {
     requestAIAllocation(totalBudget, recipients);
   };
 
+  const handlePlayableChange = (index: number, config: any) => {
+    const updatedAllocations = [...allocations];
+    updatedAllocations[index] = {
+      ...updatedAllocations[index],
+      playableType: config.playableType,
+      gameType: config.gameType,
+      quizTopic: config.quizTopic,
+      quizDifficulty: config.quizDifficulty,
+    };
+    setAllocations(updatedAllocations);
+  };
+
   const handleConfirm = () => {
-    // Save to sessionStorage (more secure than localStorage)
-    sessionStorage.setItem("allocationData", JSON.stringify({
-      totalBudget,
-      recipients: allocations,
-    }));
-    
-    // Navigate to mode selection
-    router.push("/create/mode");
+    // Validate quiz topics if any
+    const hasInvalidQuiz = allocations.some(
+      (a) => a.playableType === "QUIZ" && !a.quizTopic?.trim()
+    );
+
+    if (hasInvalidQuiz) {
+      setError("Harap isi topik quiz untuk semua penerima yang memilih mode Quiz");
+      return;
+    }
+
+    // Save to sessionStorage
+    sessionStorage.setItem(
+      "allocationData",
+      JSON.stringify({
+        totalBudget,
+        recipients: allocations,
+      })
+    );
+
+    // Navigate to confirm page
+    router.push("/create/confirm");
   };
 
   if (error) {
@@ -306,22 +354,34 @@ function AllocationContent() {
                 </CardContent>
               </Card>
 
-              {/* Reasoning Cards */}
+              {/* Reasoning Cards with Playable Selector */}
               <div>
                 <h2 className="text-xl font-bold text-foreground mb-4">
-                  Penjelasan AI
+                  Penjelasan AI & Mode Penerimaan
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {allocations.map((alloc, index) => (
-                    <ReasoningCard
-                      key={index}
-                      recipientName={alloc.name}
-                      amount={alloc.amount}
-                      reasoning={alloc.reasoning}
-                      ageLevel={alloc.ageLevel}
-                      status={alloc.status}
-                      closeness={alloc.closeness}
-                    />
+                    <div key={index} className="space-y-3">
+                      <ReasoningCard
+                        recipientName={alloc.name}
+                        amount={alloc.amount}
+                        reasoning={alloc.reasoning}
+                        ageLevel={alloc.ageLevel}
+                        status={alloc.status}
+                        closeness={alloc.closeness}
+                      />
+                      <PlayableSelector
+                        recipientName={alloc.name}
+                        config={{
+                          playableType: alloc.playableType,
+                          gameType: alloc.gameType as any,
+                          quizTopic: alloc.quizTopic,
+                          quizDifficulty: alloc.quizDifficulty as any,
+                          playableReasoning: alloc.playableReasoning,
+                        }}
+                        onChange={(config) => handlePlayableChange(index, config)}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
