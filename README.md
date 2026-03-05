@@ -41,17 +41,24 @@ frontend/
 - Node.js 18+ atau 20+
 - pnpm (recommended) atau npm
 
-### Installation
+### Quick Start
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 pnpm install
 
-# Copy environment variables
+# 2. Copy environment variables
 cp .env.example .env.local
 
-# Edit .env.local dengan konfigurasi yang sesuai
+# 3. Edit .env.local dengan konfigurasi yang sesuai
+# NEXT_PUBLIC_API_URL=http://localhost:5000/api
+# NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# 4. Run development server
+pnpm dev
 ```
+
+Aplikasi akan berjalan di `http://localhost:3000`
 
 ### Environment Variables
 
@@ -60,6 +67,26 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NODE_ENV=development
 ```
+
+### Troubleshooting
+
+**Port Already in Use:**
+```bash
+# Use different port
+pnpm dev -- -p 3001
+```
+
+**Module Not Found:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules .next
+pnpm install
+```
+
+**API Connection Failed:**
+1. Ensure backend is running on port 5000
+2. Check `NEXT_PUBLIC_API_URL` in `.env.local`
+3. Check CORS settings di backend
 
 ## 🚀 Development
 
@@ -155,21 +182,42 @@ api.createPayment(envelopeId)
 api.getPaymentStatus(paymentId)
 
 // Donation (Mayar - Support Developer)
-// Handled via payment link redirect
+api.createDonation(data)
+api.getDonationStats()
 ```
 
-### Payment Gateway Integration
+### Hybrid Payment Gateway Architecture
 
-**Xendit (THR Core)**:
-- Used for main THR payment collection
-- Automatic disbursement to recipients
-- Webhook integration for status updates
-- Sandbox mode available for testing
+BagiBerkah menggunakan **dua payment gateway** untuk fungsi yang berbeda:
 
-**Mayar (Support Developer)**:
-- Used for donation/support developer feature
-- Simple payment link integration
-- Optional feature, not required for core functionality
+#### 🎯 Xendit - THR Core System
+**Use Case**: Fitur utama THR (payment collection + disbursement)
+
+**Features**:
+- Payment collection dari pengirim (VA, E-wallet, Credit Card)
+- Disbursement otomatis ke rekening penerima
+- Webhook integration untuk real-time status updates
+- Sandbox mode untuk testing
+
+**Alasan**:
+- Memiliki Disbursement API yang lengkap
+- Support otomasi penuh (payment + payout)
+- Dokumentasi jelas dan sandbox tersedia
+
+#### 💝 Mayar - Support Developer
+**Use Case**: Fitur tambahan (donation, support developer)
+
+**Features**:
+- Payment link sederhana untuk donation
+- Multiple payment methods
+- Dashboard untuk monitoring
+
+**Alasan**:
+- Sesuai dengan sponsor kompetisi
+- Cocok untuk payment link sederhana
+- Menunjukkan kemampuan integrasi multi-gateway
+
+**Catatan Penting**: Mayar tidak menyediakan Disbursement API, sehingga untuk fitur utama THR yang memerlukan payout otomatis, kami menggunakan Xendit. Mayar tetap diintegrasikan untuk fitur tambahan yang sesuai dengan kapabilitasnya.
 
 ## 📱 Responsive Design
 
@@ -182,46 +230,41 @@ api.getPaymentStatus(paymentId)
 
 ## 🎯 Next Steps
 
-### Fitur yang Akan Diimplementasikan
+### Priority Features
 
-1. **Xendit Integration (Priority)**
-   - Replace Mayar with Xendit for THR system
-   - Payment collection integration
-   - Disbursement API implementation
-   - Webhook handling for status updates
+1. **AI Allocation Visualization** ✅ Done
+   - Recharts integration
+   - Pie, Bar, and Table views
+   - Interactive tooltips
 
-2. **Mayar Integration (Support Feature)**
-   - Payment link for support developer
-   - Donation page
-   - Thank you page
+2. **QR Code Scanner**
+   - Implement scanner for cash mode validation
+   - Real-time validation feedback
+   - Error handling
 
-3. **AI Allocation Page**
-   - Visualisasi dengan Recharts
-   - Edit manual allocation
-   - Explanation dari AI
-
-4. **QR Code Features**
-   - Generate QR untuk mode cash
-   - Scanner untuk validasi
-   - Real-time validation
-
-5. **Animations**
-   - Envelope opening animation
-   - Confetti effect
+3. **Animations & Polish**
    - Smooth transitions
+   - Loading states
+   - Error states
 
-6. **Dashboard**
-   - Envelope management
-   - Analytics
-   - History
+4. **Production Deployment**
+   - Configure production Xendit API keys
+   - Configure production Mayar API keys
+   - Deploy to Vercel
+   - Test end-to-end flow
 
 ## 🐛 Known Issues
 
-- [x] ~~AI allocation belum terintegrasi dengan backend~~ ✅ Done
-- [x] ~~Payment gateway belum diimplementasikan~~ ✅ Done (Mock mode)
-- [ ] Xendit integration untuk production
-- [ ] QR code scanner belum diimplementasikan
-- [ ] Animations masih placeholder
+- [ ] QR code scanner not fully implemented
+- [ ] Some animations are placeholders
+- [ ] Production payment gateway keys not configured (using mock mode)
+
+## 📚 Additional Documentation
+
+- **STRUCTURE.md** - Detailed project structure
+- **API_INTEGRATION.md** - Complete API integration guide
+- **DEVELOPMENT_CHECKLIST.md** - Development progress tracking
+- **Root README.md** - Complete application documentation
 
 ## 📝 Notes
 
