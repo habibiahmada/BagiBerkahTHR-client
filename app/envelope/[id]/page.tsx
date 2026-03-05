@@ -21,6 +21,9 @@ interface Recipient {
   id: string;
   name: string;
   allocatedAmount: number;
+  playableType: "DIRECT" | "GAME" | "QUIZ";
+  gameType?: string;
+  quizTemplateId?: string;
   claim: {
     token: string;
     status: string;
@@ -179,6 +182,28 @@ export default function EnvelopeDetailPage() {
 
     const config = statusConfig[status] || statusConfig.PENDING;
     return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  const getPlayableBadge = (playableType: string, gameType?: string) => {
+    if (playableType === "DIRECT") {
+      return <Badge variant="default">Langsung</Badge>;
+    } else if (playableType === "GAME") {
+      const gameNames: Record<string, string> = {
+        MEMORY_CARD: "Memory Card",
+        SCRATCH_CARD: "Scratch Card",
+        SPIN_WHEEL: "Spin Wheel",
+        BALLOON_POP: "Balloon Pop",
+        TREASURE_HUNT: "Treasure Hunt",
+      };
+      return (
+        <Badge variant="info">
+          🎮 {gameNames[gameType || ""] || "Game"}
+        </Badge>
+      );
+    } else if (playableType === "QUIZ") {
+      return <Badge variant="info">🧠 Quiz</Badge>;
+    }
+    return null;
   };
 
   if (error) {
@@ -353,6 +378,9 @@ export default function EnvelopeDetailPage() {
                           <p className="text-sm text-muted-foreground">
                             {formatCurrency(recipient.allocatedAmount)}
                           </p>
+                          <div className="flex gap-2 mt-2">
+                            {getPlayableBadge(recipient.playableType, recipient.gameType)}
+                          </div>
                         </div>
                       </div>
                       {getStatusBadge(recipient.claim.status, envelope.distributionMode)}
