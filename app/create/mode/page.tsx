@@ -20,8 +20,8 @@ export default function ModePage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get allocation data from localStorage
-    const data = localStorage.getItem("allocationData");
+    // Get allocation data from sessionStorage
+    const data = sessionStorage.getItem("allocationData");
     if (data) {
       try {
         setAllocationData(JSON.parse(data));

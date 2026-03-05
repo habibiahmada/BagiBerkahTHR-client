@@ -19,6 +19,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient, AgeLevel, Status, Closeness } from "@/lib/types";
+import { sanitizeText } from "@/lib/security";
 
 export default function CreateEnvelopePage() {
   const router = useRouter();
@@ -34,14 +35,26 @@ export default function CreateEnvelopePage() {
 
   const addRecipient = () => {
     if (!currentRecipient.name) return;
+    
+    // Validate and sanitize name
+    const name = sanitizeText(currentRecipient.name, 100);
+    if (name.length === 0) {
+      alert('Nama tidak valid');
+      return;
+    }
+    
+    // Validate greetingContext if provided
+    const greetingContext = currentRecipient.greetingContext 
+      ? sanitizeText(currentRecipient.greetingContext, 500)
+      : undefined;
 
     const newRecipient: Recipient = {
-      id: Math.random().toString(36).substring(7),
-      name: currentRecipient.name,
+      id: crypto.randomUUID(), // Use crypto.randomUUID() for security
+      name,
       ageLevel: currentRecipient.ageLevel as AgeLevel,
       status: currentRecipient.status as Status,
       closeness: currentRecipient.closeness as Closeness,
-      greetingContext: currentRecipient.greetingContext,
+      greetingContext,
     };
 
     setRecipients([...recipients, newRecipient]);

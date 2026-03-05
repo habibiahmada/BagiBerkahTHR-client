@@ -73,8 +73,8 @@ export function AlertDescription({
   ...props
 }: AlertDescriptionProps) {
   return (
-    <p className={cn("text-sm", className)} {...props}>
+    <div className={cn("text-sm", className)} {...props}>
       {children}
-    </p>
+    </div>
   );
 }

@@ -19,6 +19,7 @@ import { ManualEditModal } from "@/components/allocation/manual-edit-modal";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import type { Recipient } from "@/lib/types";
+import { validateBudget, validateRecipient, logger } from "@/lib/security";
 
 export default function AllocationPage() {
   const router = useRouter();
@@ -108,8 +109,8 @@ export default function AllocationPage() {
   };
 
   const handleConfirm = () => {
-    // Save to localStorage for next step
-    localStorage.setItem("allocationData", JSON.stringify({
+    // Save to sessionStorage (more secure than localStorage)
+    sessionStorage.setItem("allocationData", JSON.stringify({
       totalBudget,
       recipients: allocations,
     }));

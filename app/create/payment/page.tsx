@@ -12,6 +12,7 @@ import { Footer } from "@/components/layout/footer";
 import { PaymentMethodSelector } from "@/components/payment/payment-method-selector";
 import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
+import { validatePaymentUrl, logger } from "@/lib/security";
 
 export default function PaymentPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function PaymentPage() {
   const [envelopeId, setEnvelopeId] = useState<string | null>(null);
 
   useEffect(() => {
-    const data = localStorage.getItem("allocationData");
+    const data = sessionStorage.getItem("allocationData");
     if (data) {
       try {
         setAllocationData(JSON.parse(data));
@@ -65,8 +66,15 @@ export default function PaymentPage() {
         const paymentResponse: any = await api.createPayment(createdEnvelopeId);
 
         if (paymentResponse.success) {
+          const paymentUrl = paymentResponse.data.paymentUrl;
+          
+          // Validate payment URL before redirect (security)
+          if (!validatePaymentUrl(paymentUrl)) {
+            throw new Error('Invalid payment URL. Silakan hubungi support.');
+          }
+          
           // Redirect to payment gateway
-          window.location.href = paymentResponse.data.paymentUrl;
+          window.location.href = paymentUrl;
         } else {
           throw new Error(paymentResponse.error?.message || "Gagal membuat payment session");
         }
@@ -74,7 +82,7 @@ export default function PaymentPage() {
         throw new Error(envelopeResponse.error?.message || "Gagal membuat amplop");
       }
     } catch (err: any) {
-      console.error("Payment Error:", err);
+      logger.error("Payment Error:", err);
       setError(err.message || "Terjadi kesalahan saat memproses pembayaran");
       setLoading(false);
     }

@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { api } from "@/lib/api";
+import { validateAccessCode, logger } from "@/lib/security";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -21,8 +22,16 @@ export default function DashboardPage() {
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!accessCode.trim()) {
+    const code = accessCode.trim().toUpperCase();
+    
+    if (!code) {
       setError("Kode akses wajib diisi");
+      return;
+    }
+    
+    // Validate access code format
+    if (!validateAccessCode(code)) {
+      setError("Format kode akses tidak valid. Harus 8 karakter huruf dan angka.");
       return;
     }
 
@@ -30,7 +39,7 @@ export default function DashboardPage() {
     setError(null);
 
     try {
-      const response: any = await api.checkEnvelope(accessCode.trim().toUpperCase());
+      const response: any = await api.checkEnvelope(code);
 
       if (response.success && response.data.id) {
         // Redirect to envelope detail page
@@ -39,7 +48,7 @@ export default function DashboardPage() {
         setError("Amplop tidak ditemukan");
       }
     } catch (err: any) {
-      console.error("Check Envelope Error:", err);
+      logger.error("Check Envelope Error:", err);
       setError(err.message || "Terjadi kesalahan");
     } finally {
       setLoading(false);

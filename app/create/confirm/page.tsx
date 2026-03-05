@@ -22,7 +22,7 @@ export default function ConfirmPage() {
   const [claimLinks, setClaimLinks] = useState<string[]>([]);
 
   useEffect(() => {
-    const data = localStorage.getItem("allocationData");
+    const data = sessionStorage.getItem("allocationData");
     if (data) {
       try {
         setAllocationData(JSON.parse(data));
@@ -32,6 +32,11 @@ export default function ConfirmPage() {
     } else {
       setError("Data alokasi tidak ditemukan");
     }
+    
+    // Cleanup on unmount
+    return () => {
+      sessionStorage.removeItem("allocationData");
+    };
   }, []);
 
   const handleCreateEnvelope = async () => {
