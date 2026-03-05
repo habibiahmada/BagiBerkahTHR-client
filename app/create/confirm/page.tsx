@@ -19,7 +19,6 @@ export default function ConfirmPage() {
   const [allocationData, setAllocationData] = useState<any>(null);
   const [envelopeName, setEnvelopeName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [generatingQuiz, setGeneratingQuiz] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [envelope, setEnvelope] = useState<any>(null);
   const [claimLinks, setClaimLinks] = useState<string[]>([]);
@@ -49,58 +48,30 @@ export default function ConfirmPage() {
     setError(null);
 
     try {
-      // Generate quiz questions for recipients with QUIZ playable type
-      const recipientsWithQuiz = allocationData.recipients.filter(
-        (r: any) => r.playableType === "QUIZ"
-      );
+      // For quiz recipients, use the template ID directly
+      // Backend will handle loading the quiz questions from template
+      const recipientsData = allocationData.recipients.map((r: any) => ({
+        name: r.name,
+        ageLevel: r.ageLevel.toUpperCase(),
+        status: r.status.toUpperCase(),
+        closeness: r.closeness.toUpperCase(),
+        allocatedAmount: r.amount,
+        aiReasoning: r.reasoning,
+        aiGreeting: r.greeting || "",
+        greetingContext: r.greetingContext || "",
+        // Playable data
+        playableType: r.playableType,
+        gameType: r.gameType,
+        quizTopic: r.quizTopic, // This is the template ID
+        quizDifficulty: r.quizDifficulty,
+      }));
 
-      if (recipientsWithQuiz.length > 0) {
-        setGeneratingQuiz(true);
-        
-        // Generate quiz for each recipient
-        for (const recipient of recipientsWithQuiz) {
-          try {
-            const quizResponse: any = await api.generateQuiz({
-              topic: recipient.quizTopic,
-              difficulty: recipient.quizDifficulty,
-              count: 5,
-            });
-
-            if (quizResponse.success) {
-              recipient.quizQuestions = quizResponse.data.questions;
-            } else {
-              throw new Error(`Gagal generate quiz untuk ${recipient.name}`);
-            }
-          } catch (quizError: any) {
-            console.error(`Quiz generation error for ${recipient.name}:`, quizError);
-            throw new Error(`Gagal membuat quiz untuk ${recipient.name}: ${quizError.message}`);
-          }
-        }
-        
-        setGeneratingQuiz(false);
-      }
-
-      // Create envelope with playable data
+      // Create envelope
       const response: any = await api.createEnvelope({
         envelopeName: envelopeName.trim(),
         totalBudget: allocationData.totalBudget,
         distributionMode: "CASH",
-        recipients: allocationData.recipients.map((r: any) => ({
-          name: r.name,
-          ageLevel: r.ageLevel.toUpperCase(),
-          status: r.status.toUpperCase(),
-          closeness: r.closeness.toUpperCase(),
-          allocatedAmount: r.amount,
-          aiReasoning: r.reasoning,
-          aiGreeting: r.greeting || "",
-          greetingContext: r.greetingContext || "",
-          // Playable data
-          playableType: r.playableType,
-          gameType: r.gameType,
-          quizTopic: r.quizTopic,
-          quizDifficulty: r.quizDifficulty,
-          quizQuestions: r.quizQuestions,
-        })),
+        recipients: recipientsData,
       });
 
       if (response.success) {
@@ -124,7 +95,6 @@ export default function ConfirmPage() {
       setError(err.message || "Terjadi kesalahan saat membuat amplop");
     } finally {
       setLoading(false);
-      setGeneratingQuiz(false);
     }
   };
 
@@ -326,7 +296,7 @@ export default function ConfirmPage() {
                 {loading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    {generatingQuiz ? "Membuat Quiz..." : "Membuat Amplop..."}
+                    Membuat Amplop...
                   </>
                 ) : (
                   <>
