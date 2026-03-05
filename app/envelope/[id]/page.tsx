@@ -66,6 +66,8 @@ export default function EnvelopeDetailPage() {
       const response: any = await api.getEnvelope(envelopeId);
 
       if (response.success) {
+        console.log('📦 Envelope Data:', response.data);
+        console.log('👥 Recipients:', response.data.recipients);
         setEnvelope(response.data);
       } else {
         throw new Error(response.error?.message || "Gagal memuat data amplop");
