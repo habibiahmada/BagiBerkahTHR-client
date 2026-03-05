@@ -119,6 +119,22 @@ class ApiClient {
   async getPaymentStatus(paymentId: string) {
     return this.request(`/payments/${paymentId}/status`);
   }
+
+  // Donation APIs
+  async createDonation(data: {
+    amount: number;
+    donorName?: string;
+    message?: string;
+  }) {
+    return this.request('/donations/create', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getDonationStats() {
+    return this.request('/donations/stats');
+  }
 }
 
 export const api = new ApiClient(API_URL);

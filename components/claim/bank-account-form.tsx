@@ -10,7 +10,7 @@ import { BankSelector } from "./bank-selector";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 interface BankAccountFormProps {
-  onSubmit: (bankName: string, accountNumber: string) => Promise<void>;
+  onSubmit: (bankName: string, accountNumber: string, accountHolderName: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -41,7 +41,7 @@ export function BankAccountForm({ onSubmit, loading = false }: BankAccountFormPr
     }
 
     try {
-      await onSubmit(bankName, accountNumber);
+      await onSubmit(bankName, accountNumber, accountName);
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan");
     }

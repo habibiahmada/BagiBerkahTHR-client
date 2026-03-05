@@ -14,7 +14,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { QRScanner } from "@/components/qr/qr-scanner";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 
 interface Recipient {
@@ -111,11 +111,21 @@ export default function EnvelopeDetailPage() {
     }
   };
 
-  const handleCopyLink = (token: string, recipientName: string) => {
+  const handleCopyLink = async (token: string, recipientName: string) => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     const link = `${baseUrl}/claim/${token}`;
-    navigator.clipboard.writeText(link);
-    addToast(`Link untuk ${recipientName} telah disalin!`, 'success');
+    
+    try {
+      const success = await copyToClipboard(link);
+      if (success) {
+        addToast(`Link untuk ${recipientName} telah disalin!`, 'success');
+      } else {
+        addToast('Gagal menyalin link. Silakan copy manual.', 'error');
+      }
+    } catch (err) {
+      console.error('Copy error:', err);
+      addToast('Gagal menyalin link. Silakan copy manual.', 'error');
+    }
   };
 
   const handleShareLink = async (token: string, recipientName: string) => {

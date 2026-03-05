@@ -150,10 +150,26 @@ api.getClaim(token)
 api.submitClaim(token, data)
 api.validateQR(qrToken)
 
-// Payment
+// Payment (Xendit - THR System)
 api.createPayment(envelopeId)
 api.getPaymentStatus(paymentId)
+
+// Donation (Mayar - Support Developer)
+// Handled via payment link redirect
 ```
+
+### Payment Gateway Integration
+
+**Xendit (THR Core)**:
+- Used for main THR payment collection
+- Automatic disbursement to recipients
+- Webhook integration for status updates
+- Sandbox mode available for testing
+
+**Mayar (Support Developer)**:
+- Used for donation/support developer feature
+- Simple payment link integration
+- Optional feature, not required for core functionality
 
 ## 📱 Responsive Design
 
@@ -168,35 +184,42 @@ api.getPaymentStatus(paymentId)
 
 ### Fitur yang Akan Diimplementasikan
 
-1. **AI Allocation Page**
+1. **Xendit Integration (Priority)**
+   - Replace Mayar with Xendit for THR system
+   - Payment collection integration
+   - Disbursement API implementation
+   - Webhook handling for status updates
+
+2. **Mayar Integration (Support Feature)**
+   - Payment link for support developer
+   - Donation page
+   - Thank you page
+
+3. **AI Allocation Page**
    - Visualisasi dengan Recharts
    - Edit manual allocation
    - Explanation dari AI
 
-2. **Payment Integration**
-   - Mayar gateway integration
-   - Payment status tracking
-   - Webhook handling
-
-3. **QR Code Features**
+4. **QR Code Features**
    - Generate QR untuk mode cash
    - Scanner untuk validasi
    - Real-time validation
 
-4. **Animations**
+5. **Animations**
    - Envelope opening animation
    - Confetti effect
    - Smooth transitions
 
-5. **Dashboard**
+6. **Dashboard**
    - Envelope management
    - Analytics
    - History
 
 ## 🐛 Known Issues
 
-- [ ] AI allocation belum terintegrasi dengan backend
-- [ ] Payment gateway belum diimplementasikan
+- [x] ~~AI allocation belum terintegrasi dengan backend~~ ✅ Done
+- [x] ~~Payment gateway belum diimplementasikan~~ ✅ Done (Mock mode)
+- [ ] Xendit integration untuk production
 - [ ] QR code scanner belum diimplementasikan
 - [ ] Animations masih placeholder
 

@@ -103,11 +103,24 @@ export default function AllocationPage() {
   };
 
   const handleManualEdit = (updatedRecipients: any[]) => {
-    const updatedAllocations = allocations.map((alloc, index) => ({
-      ...alloc,
-      amount: updatedRecipients[index].amount,
-    }));
+    console.log('📝 Manual Edit - Updated Recipients:', updatedRecipients);
+    console.log('📝 Manual Edit - Current Allocations:', allocations);
+    
+    // Update allocations with new amounts
+    const updatedAllocations = allocations.map((alloc) => {
+      const updated = updatedRecipients.find(r => r.name === alloc.name);
+      if (updated) {
+        return {
+          ...alloc,
+          amount: updated.amount,
+        };
+      }
+      return alloc;
+    });
+    
+    console.log('📝 Manual Edit - Updated Allocations:', updatedAllocations);
     setAllocations(updatedAllocations);
+    setShowEditModal(false);
   };
 
   const handleRegenerate = () => {

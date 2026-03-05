@@ -3,26 +3,29 @@
 import { Select } from "@/components/ui/select";
 
 const INDONESIAN_BANKS = [
+  // Major Banks (Xendit Supported)
   "BCA",
   "Mandiri",
   "BNI",
   "BRI",
   "CIMB Niaga",
-  "Danamon",
   "Permata",
+  "Danamon",
   "BTN",
+  "BSI",
   "Maybank",
   "OCBC NISP",
   "Panin",
   "BTPN",
   "Jenius",
-  "Bank Jago",
+  "Mega",
+  "Sinarmas",
+  // Digital Banks
+  "BCA Digital",
   "Seabank",
-  "Blu",
-  "Neobank",
+  "Jago",
   "Allo Bank",
-  "Bank Raya",
-  "Bank Mega",
+  "BNC",
 ];
 
 interface BankSelectorProps {

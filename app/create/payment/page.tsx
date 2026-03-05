@@ -17,6 +17,7 @@ import { validatePaymentUrl, logger } from "@/lib/security";
 export default function PaymentPage() {
   const router = useRouter();
   const [allocationData, setAllocationData] = useState<any>(null);
+  const [envelopeName, setEnvelopeName] = useState("");
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,11 @@ export default function PaymentPage() {
 
   const handleCreateEnvelope = async () => {
     if (!allocationData) return;
+    
+    if (!envelopeName.trim()) {
+      setError("Nama amplop wajib diisi");
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -44,6 +50,7 @@ export default function PaymentPage() {
     try {
       // Create envelope first
       const envelopeResponse: any = await api.createEnvelope({
+        envelopeName: envelopeName.trim(),
         totalBudget: allocationData.totalBudget,
         distributionMode: "DIGITAL",
         recipients: allocationData.recipients.map((r: any) => ({
@@ -153,31 +160,50 @@ export default function PaymentPage() {
           {/* Payment Summary */}
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Ringkasan Pembayaran</CardTitle>
+              <CardTitle>Detail Amplop</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Budget:</span>
-                  <span className="font-bold text-foreground">
-                    {formatCurrency(allocationData.totalBudget)}
-                  </span>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    Nama Amplop
+                  </label>
+                  <input
+                    type="text"
+                    value={envelopeName}
+                    onChange={(e) => setEnvelopeName(e.target.value)}
+                    placeholder="Contoh: THR Lebaran 2026"
+                    maxLength={100}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Nama ini akan memudahkan Anda mengidentifikasi amplop
+                  </p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Jumlah Penerima:</span>
-                  <span className="font-bold text-foreground">
-                    {allocationData.recipients.length} orang
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Biaya Admin:</span>
-                  <span className="font-bold text-foreground">Rp 0</span>
-                </div>
-                <div className="border-t border-border pt-3 flex justify-between">
-                  <span className="font-semibold text-foreground">Total Bayar:</span>
-                  <span className="text-2xl font-bold text-primary">
-                    {formatCurrency(allocationData.totalBudget)}
-                  </span>
+                
+                <div className="pt-3 border-t border-border space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Budget:</span>
+                    <span className="font-bold text-foreground">
+                      {formatCurrency(allocationData.totalBudget)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Jumlah Penerima:</span>
+                    <span className="font-bold text-foreground">
+                      {allocationData.recipients.length} orang
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Biaya Admin:</span>
+                    <span className="font-bold text-foreground">Rp 0</span>
+                  </div>
+                  <div className="border-t border-border pt-3 flex justify-between">
+                    <span className="font-semibold text-foreground">Total Bayar:</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {formatCurrency(allocationData.totalBudget)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -217,7 +243,7 @@ export default function PaymentPage() {
             </Button>
             <Button
               onClick={handleCreateEnvelope}
-              disabled={!selectedMethod || loading}
+              disabled={!selectedMethod || !envelopeName.trim() || loading}
               size="lg"
             >
               {loading ? (

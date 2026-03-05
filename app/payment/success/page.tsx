@@ -24,17 +24,41 @@ export default function PaymentSuccessPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (paymentId) {
-      checkPaymentStatus();
+    // Try to get paymentId from URL params
+    const urlPaymentId = searchParams.get("payment_id");
+    const urlEnvelopeId = searchParams.get("envelope_id") || searchParams.get("envelopeId");
+    
+    if (urlPaymentId) {
+      checkPaymentStatus(urlPaymentId);
+    } else if (urlEnvelopeId) {
+      // Fallback: get payment from envelope
+      checkPaymentFromEnvelope(urlEnvelopeId);
     } else {
-      setError("Payment ID tidak ditemukan");
+      setError("Payment ID atau Envelope ID tidak ditemukan");
       setLoading(false);
     }
-  }, [paymentId]);
+  }, [searchParams]);
 
-  const checkPaymentStatus = async () => {
+  const checkPaymentFromEnvelope = async (envId: string) => {
     try {
-      const response: any = await api.getPaymentStatus(paymentId!);
+      const response: any = await api.getEnvelope(envId);
+
+      if (response.success && response.data.payment) {
+        setPaymentData(response.data.payment);
+      } else {
+        throw new Error("Payment tidak ditemukan");
+      }
+    } catch (err: any) {
+      console.error("Payment Status Error:", err);
+      setError(err.message || "Terjadi kesalahan");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkPaymentStatus = async (pId: string) => {
+    try {
+      const response: any = await api.getPaymentStatus(pId);
 
       if (response.success) {
         setPaymentData(response.data);
@@ -171,9 +195,9 @@ export default function PaymentSuccessPage() {
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
-            {envelopeId && (
+            {(envelopeId || paymentData?.envelopeId) && (
               <Button
-                onClick={() => router.push(`/envelope/${envelopeId}`)}
+                onClick={() => router.push(`/envelope/${envelopeId || paymentData.envelopeId}`)}
                 size="lg"
                 className="w-full"
               >

@@ -68,11 +68,18 @@ export default function ClaimPage() {
         // Check if already claimed/validated
         if (response.data.status === "VALIDATED") {
           setStep("claimed");
-          setClaimResult(response.data);
+          setClaimResult({
+            ...response.data,
+            claimMethod: response.data.claimMethod || 'cash',
+          });
         } else if (response.data.status === "CLAIMED") {
-          // Already submitted, show appropriate view
-          setSelectedMethod(response.data.claimMethod);
-          setClaimResult(response.data);
+          // Already submitted, show appropriate view based on claimMethod
+          const method = response.data.claimMethod || 'digital';
+          setSelectedMethod(method);
+          setClaimResult({
+            ...response.data,
+            claimMethod: method,
+          });
           setStep("claimed");
         } else {
           setStep("envelope");
@@ -110,7 +117,7 @@ export default function ClaimPage() {
     }
   };
 
-  const handleDigitalClaim = async (bankName: string, accountNumber: string) => {
+  const handleDigitalClaim = async (bankName: string, accountNumber: string, accountHolderName: string) => {
     setSubmitting(true);
     setError(null);
 
@@ -119,6 +126,7 @@ export default function ClaimPage() {
         claimMethod: "digital",
         bankAccount: accountNumber,
         bankName: bankName,
+        accountHolderName: accountHolderName,
       });
 
       if (response.success) {
@@ -360,7 +368,7 @@ export default function ClaimPage() {
           {/* Claimed Step */}
           {step === "claimed" && claimData && claimResult && (
             <div>
-              {claimResult.claimMethod === "digital" ? (
+              {(claimResult.claimMethod === "digital" || (claimResult.bankAccount && claimResult.bankName)) ? (
                 <ClaimSuccess
                   amount={claimData.amount}
                   recipientName={claimData.recipientName}

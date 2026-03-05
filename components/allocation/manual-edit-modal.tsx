@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Scale } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -36,34 +37,65 @@ export function ManualEditModal({
 }: ManualEditModalProps) {
   const [editedRecipients, setEditedRecipients] = useState<Recipient[]>(recipients);
 
+  // Reset state when modal opens or recipients change
+  useEffect(() => {
+    if (open) {
+      setEditedRecipients(recipients);
+    }
+  }, [open, recipients]);
+
   const currentTotal = editedRecipients.reduce((sum, r) => sum + r.amount, 0);
   const difference = totalBudget - currentTotal;
   const isValid = difference === 0;
 
   const handleAmountChange = (index: number, value: string) => {
-    // Only allow integers
-    if (value === '' || /^\d+$/.test(value)) {
-      const amount = parseInt(value) || 0;
-      
-      // Validate minimum amount per recipient (at least 1000)
-      if (amount > 0 && amount < 1000) {
-        return; // Don't update if less than 1000
-      }
-      
+    console.log(`💰 Amount Change [${index}]:`, value);
+    
+    // Remove any non-digit characters
+    const cleanValue = value.replace(/\D/g, '');
+    
+    if (cleanValue === '') {
       const updated = [...editedRecipients];
-      updated[index] = { ...updated[index], amount };
+      updated[index] = { ...updated[index], amount: 0 };
       setEditedRecipients(updated);
+      return;
     }
+    
+    const amount = parseInt(cleanValue);
+    
+    // Validate minimum amount per recipient (at least 1000)
+    if (amount > 0 && amount < 1000) {
+      console.warn(`⚠️ Amount too small: ${amount} (min: 1000)`);
+      // Still update but will show validation error
+    }
+    
+    const updated = [...editedRecipients];
+    updated[index] = { ...updated[index], amount };
+    setEditedRecipients(updated);
+    
+    console.log(`✅ Updated recipient [${index}]:`, updated[index]);
   };
 
   const handleSave = () => {
+    console.log('💾 Saving Manual Edit:', {
+      isValid,
+      editedRecipients,
+      currentTotal,
+      totalBudget,
+      difference
+    });
+    
     if (isValid) {
       onSave(editedRecipients);
       onOpenChange(false);
+    } else {
+      console.warn('⚠️ Cannot save: Total does not match budget');
     }
   };
 
   const handleDistributeEvenly = () => {
+    console.log('⚖️ Distributing evenly:', { totalBudget, recipientCount: editedRecipients.length });
+    
     const perPerson = Math.floor(totalBudget / editedRecipients.length);
     const remainder = totalBudget % editedRecipients.length;
 
@@ -72,6 +104,7 @@ export function ManualEditModal({
       amount: perPerson + (i === 0 ? remainder : 0),
     }));
 
+    console.log('⚖️ Even distribution result:', updated);
     setEditedRecipients(updated);
   };
 
@@ -122,6 +155,7 @@ export function ManualEditModal({
             onClick={handleDistributeEvenly}
             className="w-full"
           >
+            <Scale className="w-4 h-4 mr-2" />
             Bagi Rata
           </Button>
 
@@ -129,22 +163,37 @@ export function ManualEditModal({
           <div className="space-y-3">
             {editedRecipients.map((recipient, index) => (
               <div key={index} className="space-y-2">
-                <Label htmlFor={`amount-${index}`}>{recipient.name}</Label>
-                <Input
-                  id={`amount-${index}`}
-                  type="number"
-                  value={recipient.amount}
-                  min={1000}
-                  step={1000}
-                  onChange={(e) => handleAmountChange(index, e.target.value)}
-                  onKeyDown={(e) => {
-                    // Prevent decimal point and minus
-                    if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E') {
-                      e.preventDefault();
-                    }
-                  }}
-                  placeholder="Minimal Rp 1.000"
-                />
+                <Label htmlFor={`amount-${index}`} className="flex items-center justify-between">
+                  <span>{recipient.name}</span>
+                  <span className="text-xs text-muted-foreground font-normal">
+                    {formatCurrency(recipient.amount)}
+                  </span>
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                    Rp
+                  </span>
+                  <Input
+                    id={`amount-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    value={recipient.amount || ''}
+                    onChange={(e) => handleAmountChange(index, e.target.value)}
+                    onKeyDown={(e) => {
+                      // Prevent decimal point and minus
+                      if (e.key === '.' || e.key === ',' || e.key === '-' || e.key === 'e' || e.key === 'E') {
+                        e.preventDefault();
+                      }
+                    }}
+                    placeholder="0"
+                    className="pl-10"
+                  />
+                </div>
+                {recipient.amount > 0 && recipient.amount < 1000 && (
+                  <p className="text-xs text-red-600">
+                    Minimal Rp 1.000
+                  </p>
+                )}
               </div>
             ))}
           </div>

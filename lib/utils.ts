@@ -32,19 +32,56 @@ export function formatDate(date: Date | string): string {
 }
 
 /**
- * Generate random ID
+ * Generate random ID (browser-compatible)
+ * Uses crypto.randomUUID if available, otherwise falls back to secure random
  */
 export function generateId(): string {
-  return Math.random().toString(36).substring(2, 15);
+  // Try crypto.randomUUID (modern browsers)
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback: Use crypto.getRandomValues for secure random
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+  
+  // Last resort fallback (not cryptographically secure)
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
 }
 
 /**
- * Copy text to clipboard
+ * Copy text to clipboard with fallback for older browsers
  */
 export async function copyToClipboard(text: string): Promise<boolean> {
   try {
-    await navigator.clipboard.writeText(text);
-    return true;
+    // Try modern clipboard API
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+    
+    // Fallback for older browsers or non-HTTPS
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return successful;
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+      document.body.removeChild(textArea);
+      return false;
+    }
   } catch (error) {
     console.error('Failed to copy:', error);
     return false;

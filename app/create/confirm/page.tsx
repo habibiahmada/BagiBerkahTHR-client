@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 
 export default function ConfirmPage() {
@@ -88,9 +88,18 @@ export default function ConfirmPage() {
     }
   };
 
-  const handleCopyLink = (link: string, index: number) => {
-    navigator.clipboard.writeText(link);
-    addToast(`Link untuk ${allocationData.recipients[index].name} telah disalin!`, 'success');
+  const handleCopyLink = async (link: string, index: number) => {
+    try {
+      const success = await copyToClipboard(link);
+      if (success) {
+        addToast(`Link untuk ${allocationData.recipients[index].name} telah disalin!`, 'success');
+      } else {
+        addToast('Gagal menyalin link. Silakan copy manual.', 'error');
+      }
+    } catch (err) {
+      console.error('Copy error:', err);
+      addToast('Gagal menyalin link. Silakan copy manual.', 'error');
+    }
   };
 
   const handleShareLink = async (link: string, recipientName: string) => {

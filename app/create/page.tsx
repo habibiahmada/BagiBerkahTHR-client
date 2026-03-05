@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, generateId } from "@/lib/utils";
 import type { Recipient, AgeLevel, Status, Closeness } from "@/lib/types";
 import { sanitizeText } from "@/lib/security";
 import { useToast } from "@/components/ui/toast";
@@ -52,7 +52,7 @@ export default function CreateEnvelopePage() {
       : undefined;
 
     const newRecipient: Recipient = {
-      id: crypto.randomUUID(), // Use crypto.randomUUID() for security
+      id: generateId(), // Use browser-compatible ID generation
       name,
       ageLevel: currentRecipient.ageLevel as AgeLevel,
       status: currentRecipient.status as Status,

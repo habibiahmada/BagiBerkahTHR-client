@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { Moon, Star, Gift, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -6,7 +10,24 @@ export function CtaSection() {
     return (
         <section className="py-20">
             <div className="container mx-auto px-4">
-                <div className="relative rounded-3xl bg-gradient-hero p-10 md:p-16 text-center overflow-hidden">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7 }}
+                    className="relative rounded-3xl bg-gradient-hero p-10 md:p-16 text-center overflow-hidden"
+                >
+                    {/* Background pattern */}
+                    <div className="absolute inset-0 opacity-[0.15]">
+                        <Image
+                            src="/moon.png"
+                            alt=""
+                            fill
+                            className="object-cover rounded-3xl"
+                            priority
+                        />
+                    </div>
+                    <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/20 to-background/30 rounded-3xl" />
                     {/* Decorative circles */}
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-6 left-10 w-16 h-16 rounded-full border-2 border-primary-foreground/30" />
@@ -58,7 +79,7 @@ export function CtaSection() {
                             menit
                         </p>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

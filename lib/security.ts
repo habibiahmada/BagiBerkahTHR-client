@@ -12,13 +12,22 @@ export const validatePaymentUrl = (url: string): boolean => {
     
     // Whitelist allowed payment gateway domains
     const allowedDomains = [
+      // Xendit (Primary for THR system)
+      'xendit.co',
+      'api.xendit.co',
+      'checkout.xendit.co',
+      'dashboard.xendit.co',
+      // Mayar (Support developer feature)
+      'mayar.id',
+      'api.mayar.id',
+      'mayar.club',
+      'api.mayar.club',
+      'sandbox.mayar.id',
+      // Legacy support
       'midtrans.com',
       'sandbox.midtrans.com',
       'api.midtrans.com',
       'app.midtrans.com',
-      'xendit.co',
-      'api.xendit.co',
-      'checkout.xendit.co',
     ];
     
     // Check if hostname matches or is subdomain of allowed domains
@@ -26,10 +35,17 @@ export const validatePaymentUrl = (url: string): boolean => {
       parsedUrl.hostname === domain || parsedUrl.hostname.endsWith(`.${domain}`)
     );
     
-    // Must use HTTPS
-    const isSecure = parsedUrl.protocol === 'https:';
+    // Allow localhost for development (mock payment)
+    const isLocalhost = parsedUrl.hostname === 'localhost' || 
+                       parsedUrl.hostname === '127.0.0.1' ||
+                       parsedUrl.hostname.startsWith('192.168.') ||
+                       parsedUrl.hostname === '::1';
     
-    return isAllowed && isSecure;
+    // Must use HTTPS in production, allow HTTP for localhost
+    const isSecure = parsedUrl.protocol === 'https:' || 
+                    (isLocalhost && parsedUrl.protocol === 'http:');
+    
+    return (isAllowed || isLocalhost) && isSecure;
   } catch {
     return false;
   }
