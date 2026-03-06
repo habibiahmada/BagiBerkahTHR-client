@@ -19,7 +19,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   const isScanningRef = useRef(false);
   const elementId = useRef(`qr-reader-${Date.now()}`).current;
   const lastScanRef = useRef<{ data: string; time: number } | null>(null);
-  const SCAN_COOLDOWN = 2000; // 2 seconds cooldown between same QR scans
+  const SCAN_COOLDOWN = 1000; // 1 second cooldown between same QR scans
 
   const startScanning = async () => {
     try {
@@ -49,14 +49,17 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       const container = document.getElementById(elementId);
       const containerWidth = container?.offsetWidth || 300;
       
-      // Calculate qrbox size - smaller for better fit in modal
-      const qrboxSize = Math.min(containerWidth * 0.7, 220); // 70% of container, max 220px
+      // Calculate qrbox size - larger for better scanning
+      const qrboxSize = Math.min(containerWidth * 0.85, 280); // 85% of container, max 280px
 
       const config = {
-        fps: 10,
+        fps: 30, // Increased FPS for faster scanning
         qrbox: { width: qrboxSize, height: qrboxSize },
         aspectRatio: 1.0,
         disableFlip: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true // Use native barcode detector if available
+        }
       };
 
       await scannerRef.current.start(
@@ -200,11 +203,15 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         </div>
 
         {isScanning && (
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Arahkan kamera ke QR code...</span>
+            <span>Scanning... Arahkan kamera ke QR code</span>
           </div>
         )}
+        
+        <p className="text-xs text-center text-muted-foreground">
+          Tips: Pastikan QR code terlihat jelas dan pencahayaan cukup
+        </p>
       </CardContent>
       
       <style jsx global>{`

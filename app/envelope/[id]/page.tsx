@@ -95,17 +95,17 @@ export default function EnvelopeDetailPage() {
           fetchEnvelopeData();
           setScanResult(null);
           // Keep scanner open for next scan
-        }, 2000);
+        }, 1500);
       } else {
         setScanResult({
           success: false,
           message: response.data?.message || "QR code tidak valid",
         });
         
-        // Clear error after 2 seconds
+        // Clear error after 1.5 seconds
         setTimeout(() => {
           setScanResult(null);
-        }, 2000);
+        }, 1500);
       }
     } catch (err: any) {
       console.error("QR Validation Error:", err);
@@ -114,10 +114,10 @@ export default function EnvelopeDetailPage() {
         message: err.message || "Terjadi kesalahan",
       });
       
-      // Clear error after 2 seconds
+      // Clear error after 1.5 seconds
       setTimeout(() => {
         setScanResult(null);
-      }, 2000);
+      }, 1500);
     }
   };
 
