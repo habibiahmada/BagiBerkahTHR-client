@@ -90,17 +90,22 @@ export default function EnvelopeDetailPage() {
           amount: response.data.amount,
         });
         
-        // Refresh envelope data
+        // Refresh envelope data after showing success message
         setTimeout(() => {
           fetchEnvelopeData();
-          setShowScanner(false);
           setScanResult(null);
-        }, 3000);
+          // Keep scanner open for next scan
+        }, 2000);
       } else {
         setScanResult({
           success: false,
           message: response.data?.message || "QR code tidak valid",
         });
+        
+        // Clear error after 2 seconds
+        setTimeout(() => {
+          setScanResult(null);
+        }, 2000);
       }
     } catch (err: any) {
       console.error("QR Validation Error:", err);
@@ -108,6 +113,11 @@ export default function EnvelopeDetailPage() {
         success: false,
         message: err.message || "Terjadi kesalahan",
       });
+      
+      // Clear error after 2 seconds
+      setTimeout(() => {
+        setScanResult(null);
+      }, 2000);
     }
   };
 

@@ -18,6 +18,8 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isScanningRef = useRef(false);
   const elementId = useRef(`qr-reader-${Date.now()}`).current;
+  const lastScanRef = useRef<{ data: string; time: number } | null>(null);
+  const SCAN_COOLDOWN = 2000; // 2 seconds cooldown between same QR scans
 
   const startScanning = async () => {
     try {
@@ -27,9 +29,21 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       // Wait for DOM to update
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      if (!scannerRef.current) {
-        scannerRef.current = new Html5Qrcode(elementId);
+      // Clean up existing scanner if any
+      if (scannerRef.current) {
+        try {
+          if (isScanningRef.current) {
+            await scannerRef.current.stop();
+          }
+          await scannerRef.current.clear();
+        } catch (err) {
+          console.error("Error cleaning up old scanner:", err);
+        }
+        scannerRef.current = null;
       }
+
+      // Create new scanner instance
+      scannerRef.current = new Html5Qrcode(elementId);
 
       // Get container width for responsive qrbox
       const container = document.getElementById(elementId);
@@ -49,8 +63,21 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         { facingMode: "environment" },
         config,
         (decodedText) => {
+          // Prevent duplicate scans within cooldown period
+          const now = Date.now();
+          if (
+            lastScanRef.current &&
+            lastScanRef.current.data === decodedText &&
+            now - lastScanRef.current.time < SCAN_COOLDOWN
+          ) {
+            return; // Ignore duplicate scan
+          }
+          
+          // Update last scan
+          lastScanRef.current = { data: decodedText, time: now };
+          
+          // Call onScan callback
           onScan(decodedText);
-          stopScanning();
         },
         () => {
           // Ignore continuous scanning errors
@@ -71,6 +98,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
     try {
       if (scannerRef.current && isScanningRef.current) {
         await scannerRef.current.stop();
+        await scannerRef.current.clear();
         isScanningRef.current = false;
       }
       setIsScanning(false);
@@ -83,10 +111,22 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
   useEffect(() => {
     return () => {
-      if (scannerRef.current && isScanningRef.current) {
-        scannerRef.current.stop().catch(console.error);
-        isScanningRef.current = false;
-      }
+      // Cleanup on unmount
+      const cleanup = async () => {
+        if (scannerRef.current) {
+          try {
+            if (isScanningRef.current) {
+              await scannerRef.current.stop();
+            }
+            await scannerRef.current.clear();
+            scannerRef.current = null;
+            isScanningRef.current = false;
+          } catch (err) {
+            console.error("Cleanup error:", err);
+          }
+        }
+      };
+      cleanup();
     };
   }, []);
 
@@ -133,15 +173,29 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
               Mulai Scan
             </Button>
           ) : (
-            <Button
-              onClick={stopScanning}
-              variant="outline"
-              className="w-full"
-              size="lg"
-            >
-              <CameraOff className="w-4 h-4" />
-              Berhenti Scan
-            </Button>
+            <>
+              <Button
+                onClick={stopScanning}
+                variant="outline"
+                className="flex-1"
+                size="lg"
+              >
+                <CameraOff className="w-4 h-4" />
+                Berhenti
+              </Button>
+              <Button
+                onClick={async () => {
+                  await stopScanning();
+                  setTimeout(() => startScanning(), 300);
+                }}
+                variant="secondary"
+                className="flex-1"
+                size="lg"
+              >
+                <Camera className="w-4 h-4" />
+                Restart
+              </Button>
+            </>
           )}
         </div>
 
