@@ -113,7 +113,6 @@ class ApiClient {
   }
 
   async validateQR(qrToken: string) {
-    console.log('🔐 API validateQR called with:', { qrToken, length: qrToken.length });
     return this.request(`/claims/validate-qr`, {
       method: 'POST',
       body: JSON.stringify({ qrToken }),

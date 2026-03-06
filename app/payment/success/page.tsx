@@ -251,14 +251,6 @@ function PaymentSuccessContent() {
               </Button>
             </Link>
             <Button
-              onClick={() => router.push("/dashboard")}
-              variant="outline"
-              size="lg"
-              className="w-full"
-            >
-              Ke Dashboard
-            </Button>
-            <Button
               onClick={() => router.push("/")}
               variant="ghost"
               size="lg"

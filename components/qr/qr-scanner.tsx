@@ -31,9 +31,18 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         scannerRef.current = new Html5Qrcode(elementId);
       }
 
+      // Get container width for responsive qrbox
+      const container = document.getElementById(elementId);
+      const containerWidth = container?.offsetWidth || 300;
+      
+      // Calculate qrbox size - smaller for better fit in modal
+      const qrboxSize = Math.min(containerWidth * 0.7, 220); // 70% of container, max 220px
+
       const config = {
         fps: 10,
-        qrbox: { width: 250, height: 250 },
+        qrbox: { width: qrboxSize, height: qrboxSize },
+        aspectRatio: 1.0,
+        disableFlip: false,
       };
 
       await scannerRef.current.start(
@@ -87,14 +96,29 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         <CardTitle>Scan QR Code</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div
-          id={elementId}
-          className="w-full"
-          style={{ 
-            minHeight: isScanning ? "400px" : "0px",
-            display: isScanning ? "block" : "none"
-          }}
-        />
+        {/* Scanner Container */}
+        <div className="relative w-full overflow-hidden rounded-lg bg-black">
+          <div
+            id={elementId}
+            className="w-full qr-scanner-container"
+            style={{ 
+              minHeight: isScanning ? "280px" : "0px",
+              maxHeight: isScanning ? "400px" : "0px",
+              display: isScanning ? "block" : "none"
+            }}
+          />
+          
+          {!isScanning && (
+            <div className="flex items-center justify-center py-12 bg-muted/50 rounded-lg">
+              <div className="text-center">
+                <Camera className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  Klik tombol di bawah untuk memulai scan
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {error && (
           <Alert variant="error">
@@ -104,7 +128,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
         <div className="flex gap-2">
           {!isScanning ? (
-            <Button onClick={startScanning} className="w-full">
+            <Button onClick={startScanning} className="w-full" size="lg">
               <Camera className="w-4 h-4" />
               Mulai Scan
             </Button>
@@ -113,6 +137,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
               onClick={stopScanning}
               variant="outline"
               className="w-full"
+              size="lg"
             >
               <CameraOff className="w-4 h-4" />
               Berhenti Scan
@@ -127,6 +152,41 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           </div>
         )}
       </CardContent>
+      
+      <style jsx global>{`
+        .qr-scanner-container {
+          max-width: 100%;
+          margin: 0 auto;
+        }
+        
+        .qr-scanner-container video {
+          width: 100% !important;
+          height: auto !important;
+          max-height: 400px !important;
+          object-fit: contain !important;
+          border-radius: 0.5rem;
+          display: block;
+        }
+        
+        .qr-scanner-container canvas {
+          display: none !important;
+        }
+        
+        .qr-scanner-container #qr-shaded-region {
+          border-width: 30px !important;
+          border-color: rgba(0, 0, 0, 0.48) !important;
+        }
+        
+        @media (max-width: 640px) {
+          .qr-scanner-container video {
+            max-height: 280px !important;
+          }
+          
+          .qr-scanner-container #qr-shaded-region {
+            border-width: 20px !important;
+          }
+        }
+      `}</style>
     </Card>
   );
 }

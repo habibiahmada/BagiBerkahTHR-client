@@ -175,6 +175,29 @@ export default function CreateEnvelopePage() {
                     }}
                     className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
+                  
+                  {/* Quick Amount Buttons */}
+                  <div className="mt-3">
+                    <p className="text-xs text-muted-foreground mb-2">Pilih cepat:</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[20000, 50000, 100000, 200000, 500000, 1000000].map((amount) => (
+                        <Button
+                          key={amount}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setTotalBudget(amount.toString());
+                            setBudgetError("");
+                          }}
+                          className="text-xs"
+                        >
+                          {formatCurrency(amount)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
                   {totalBudget && (
                     <p className="text-sm text-muted-foreground mt-2">
                       Total: {formatCurrency(Number(totalBudget))}

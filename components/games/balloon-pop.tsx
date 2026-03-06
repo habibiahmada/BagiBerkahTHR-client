@@ -62,11 +62,11 @@ export function BalloonPop({ onComplete }: BalloonPopProps) {
               onClick={() => handlePop(balloon.id)}
               disabled={balloon.popped}
               className={`aspect-square rounded-full ${
-                balloon.popped ? "bg-transparent" : balloon.color
-              } relative overflow-hidden transition-all hover:scale-110 disabled:hover:scale-100`}
+                balloon.popped && !balloon.hasPrize ? "bg-transparent" : balloon.color
+              } relative overflow-visible transition-all hover:scale-110 disabled:hover:scale-100`}
               whileTap={{ scale: 0.8 }}
               animate={
-                balloon.popped
+                balloon.popped && !balloon.hasPrize
                   ? { scale: 0, opacity: 0 }
                   : { scale: 1, opacity: 1 }
               }
@@ -79,11 +79,11 @@ export function BalloonPop({ onComplete }: BalloonPopProps) {
               )}
               {balloon.popped && balloon.hasPrize && (
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1.5 }}
-                  className="absolute inset-0 flex items-center justify-center"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1.5, opacity: 1 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
                 >
-                  <span className="text-4xl">🎁</span>
+                  <span className="text-5xl drop-shadow-lg">🎁</span>
                 </motion.div>
               )}
             </motion.button>

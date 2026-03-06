@@ -125,9 +125,6 @@ function AllocationContent() {
   };
 
   const handleManualEdit = (updatedRecipients: any[]) => {
-    console.log('📝 Manual Edit - Updated Recipients:', updatedRecipients);
-    console.log('📝 Manual Edit - Current Allocations:', allocations);
-    
     // Update allocations with new amounts
     const updatedAllocations = allocations.map((alloc) => {
       const updated = updatedRecipients.find(r => r.name === alloc.name);
@@ -140,7 +137,6 @@ function AllocationContent() {
       return alloc;
     });
     
-    console.log('📝 Manual Edit - Updated Allocations:', updatedAllocations);
     setAllocations(updatedAllocations);
     setShowEditModal(false);
   };

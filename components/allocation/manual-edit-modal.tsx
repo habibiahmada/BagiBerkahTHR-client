@@ -49,8 +49,6 @@ export function ManualEditModal({
   const isValid = difference === 0;
 
   const handleAmountChange = (index: number, value: string) => {
-    console.log(`💰 Amount Change [${index}]:`, value);
-    
     // Remove any non-digit characters
     const cleanValue = value.replace(/\D/g, '');
     
@@ -72,19 +70,9 @@ export function ManualEditModal({
     const updated = [...editedRecipients];
     updated[index] = { ...updated[index], amount };
     setEditedRecipients(updated);
-    
-    console.log(`✅ Updated recipient [${index}]:`, updated[index]);
   };
 
   const handleSave = () => {
-    console.log('💾 Saving Manual Edit:', {
-      isValid,
-      editedRecipients,
-      currentTotal,
-      totalBudget,
-      difference
-    });
-    
     if (isValid) {
       onSave(editedRecipients);
       onOpenChange(false);
@@ -94,8 +82,6 @@ export function ManualEditModal({
   };
 
   const handleDistributeEvenly = () => {
-    console.log('⚖️ Distributing evenly:', { totalBudget, recipientCount: editedRecipients.length });
-    
     const perPerson = Math.floor(totalBudget / editedRecipients.length);
     const remainder = totalBudget % editedRecipients.length;
 
@@ -104,7 +90,6 @@ export function ManualEditModal({
       amount: perPerson + (i === 0 ? remainder : 0),
     }));
 
-    console.log('⚖️ Even distribution result:', updated);
     setEditedRecipients(updated);
   };
 

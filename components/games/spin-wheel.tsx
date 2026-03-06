@@ -51,44 +51,32 @@ export function SpinWheel({ onComplete }: SpinWheelProps) {
 
           {/* Wheel */}
           <motion.div
-            className="w-full h-full rounded-full relative overflow-hidden shadow-lg"
+            className="w-full h-full rounded-full relative overflow-hidden shadow-lg border-4 border-white"
             animate={{ rotate: rotation }}
             transition={{
               duration: 4,
               ease: "easeOut",
             }}
+            style={{ background: 'conic-gradient(from 0deg, #10b981 0deg 90deg, #3b82f6 90deg 180deg, #a855f7 180deg 270deg, #ec4899 270deg 360deg)' }}
           >
-            {/* Segments */}
+            {/* Text labels */}
             <div className="absolute inset-0">
-              {/* WIN segment (top) */}
-              <div className="absolute inset-0 bg-linear-to-br from-primary to-primary/80 clip-segment-1">
-                <div className="absolute top-8 left-1/2 -translate-x-1/2 text-primary-foreground font-bold text-xl">
-                  WIN
-                </div>
+              <div className="absolute top-12 left-1/2 -translate-x-1/2 text-white font-bold text-2xl drop-shadow-lg">
+                WIN
               </div>
-              
-              {/* Other segments */}
-              <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-blue-600 clip-segment-2">
-                <div className="absolute top-1/2 right-8 text-white font-bold text-lg rotate-90">
-                  SPIN
-                </div>
+              <div className="absolute top-1/2 right-12 -translate-y-1/2 text-white font-bold text-xl drop-shadow-lg rotate-90 origin-center">
+                SPIN
               </div>
-              
-              <div className="absolute inset-0 bg-linear-to-br from-purple-500 to-purple-600 clip-segment-3">
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white font-bold text-lg rotate-180">
-                  AGAIN
-                </div>
+              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white font-bold text-xl drop-shadow-lg rotate-180 origin-center">
+                AGAIN
               </div>
-              
-              <div className="absolute inset-0 bg-linear-to-br from-pink-500 to-pink-600 clip-segment-4">
-                <div className="absolute top-1/2 left-8 text-white font-bold text-lg -rotate-90">
-                  TRY
-                </div>
+              <div className="absolute top-1/2 left-12 -translate-y-1/2 text-white font-bold text-xl drop-shadow-lg -rotate-90 origin-center">
+                TRY
               </div>
             </div>
 
             {/* Center circle */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white shadow-lg flex items-center justify-center z-10">
               <div className="text-2xl">🎯</div>
             </div>
           </motion.div>
@@ -110,21 +98,6 @@ export function SpinWheel({ onComplete }: SpinWheelProps) {
           </p>
         )}
       </CardContent>
-
-      <style jsx>{`
-        .clip-segment-1 {
-          clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 50%);
-        }
-        .clip-segment-2 {
-          clip-path: polygon(50% 50%, 100% 50%, 100% 100%, 50% 100%);
-        }
-        .clip-segment-3 {
-          clip-path: polygon(50% 50%, 50% 100%, 0% 100%, 0% 50%);
-        }
-        .clip-segment-4 {
-          clip-path: polygon(50% 50%, 0% 50%, 0% 0%, 50% 0%);
-        }
-      `}</style>
     </Card>
   );
 }

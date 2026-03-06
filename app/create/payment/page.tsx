@@ -27,7 +27,12 @@ export default function PaymentPage() {
     const data = sessionStorage.getItem("allocationData");
     if (data) {
       try {
-        setAllocationData(JSON.parse(data));
+        const parsedData = JSON.parse(data);
+        setAllocationData(parsedData);
+        // Get envelope name from allocation data
+        if (parsedData.envelopeName) {
+          setEnvelopeName(parsedData.envelopeName);
+        }
       } catch (err) {
         setError("Data alokasi tidak valid");
       }
@@ -37,12 +42,7 @@ export default function PaymentPage() {
   }, []);
 
   const handleCreateEnvelope = async () => {
-    if (!allocationData) return;
-    
-    if (!envelopeName.trim()) {
-      setError("Nama amplop wajib diisi");
-      return;
-    }
+    if (!allocationData || !envelopeName) return;
 
     setLoading(true);
     setError(null);
@@ -50,7 +50,7 @@ export default function PaymentPage() {
     try {
       // Create envelope first
       const envelopeResponse: any = await api.createEnvelope({
-        envelopeName: envelopeName.trim(),
+        envelopeName: envelopeName,
         totalBudget: allocationData.totalBudget,
         distributionMode: "DIGITAL",
         recipients: allocationData.recipients.map((r: any) => ({
@@ -62,6 +62,10 @@ export default function PaymentPage() {
           aiReasoning: r.reasoning,
           aiGreeting: r.greeting || "",
           greetingContext: r.greetingContext || "",
+          playableType: r.playableType,
+          gameType: r.gameType,
+          quizTopic: r.quizTopic,
+          quizDifficulty: r.quizDifficulty,
         })),
       });
 
@@ -107,7 +111,7 @@ export default function PaymentPage() {
             <Alert variant="error">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-            <Link href="/create/mode" className="mt-4 inline-block">
+            <Link href="/create/confirm" className="mt-4 inline-block">
               <Button variant="outline">
                 <ArrowLeft className="w-4 h-4" />
                 Kembali
@@ -143,7 +147,7 @@ export default function PaymentPage() {
           {/* Header */}
           <div className="mb-8">
             <Link
-              href="/create/mode"
+              href="/create/confirm"
               className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -168,17 +172,9 @@ export default function PaymentPage() {
                   <label className="text-sm font-medium text-foreground mb-2 block">
                     Nama Amplop
                   </label>
-                  <input
-                    type="text"
-                    value={envelopeName}
-                    onChange={(e) => setEnvelopeName(e.target.value)}
-                    placeholder="Contoh: THR Lebaran 2026"
-                    maxLength={100}
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Nama ini akan memudahkan Anda mengidentifikasi amplop
-                  </p>
+                  <div className="w-full px-4 py-2 border border-border rounded-lg bg-muted/50">
+                    <p className="text-foreground">{envelopeName || "Loading..."}</p>
+                  </div>
                 </div>
                 
                 <div className="pt-3 border-t border-border space-y-3">
@@ -243,7 +239,7 @@ export default function PaymentPage() {
             </Button>
             <Button
               onClick={handleCreateEnvelope}
-              disabled={!selectedMethod || !envelopeName.trim() || loading}
+              disabled={!selectedMethod || !envelopeName || loading}
               size="lg"
             >
               {loading ? (

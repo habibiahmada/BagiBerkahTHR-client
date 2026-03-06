@@ -35,6 +35,7 @@ interface Recipient {
 interface EnvelopeData {
   id: string;
   envelopeName: string;
+  accessCode: string;
   totalBudget: number;
   distributionMode: string;
   status: string;
@@ -66,8 +67,6 @@ export default function EnvelopeDetailPage() {
       const response: any = await api.getEnvelope(envelopeId);
 
       if (response.success) {
-        console.log('📦 Envelope Data:', response.data);
-        console.log('👥 Recipients:', response.data.recipients);
         setEnvelope(response.data);
       } else {
         throw new Error(response.error?.message || "Gagal memuat data amplop");
@@ -81,10 +80,6 @@ export default function EnvelopeDetailPage() {
   };
 
   const handleQRScan = async (qrToken: string) => {
-    console.log('📱 QR Scanned:', qrToken);
-    console.log('📱 QR Token length:', qrToken.length);
-    console.log('📱 QR Token type:', typeof qrToken);
-    
     try {
       const response: any = await api.validateQR(qrToken);
 
@@ -281,6 +276,53 @@ export default function EnvelopeDetailPage() {
               <CardTitle>Ringkasan</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Access Code Display */}
+              {envelope.accessCode && (
+                <div className="mb-6 p-4 bg-primary/5 border-2 border-primary/20 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Kode Amplop
+                    </p>
+                    <div className="flex items-center justify-center gap-2">
+                      <p 
+                        className="text-3xl font-bold text-primary tracking-wider font-mono select-all cursor-pointer"
+                        onClick={(e) => {
+                          const selection = window.getSelection();
+                          const range = document.createRange();
+                          range.selectNodeContents(e.currentTarget);
+                          selection?.removeAllRanges();
+                          selection?.addRange(range);
+                        }}
+                      >
+                        {envelope.accessCode}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={async () => {
+                          try {
+                            const success = await copyToClipboard(envelope.accessCode);
+                            if (success) {
+                              addToast('Kode amplop berhasil disalin!', 'success');
+                            } else {
+                              addToast('Gagal menyalin kode amplop.', 'error');
+                            }
+                          } catch (err) {
+                            console.error('Copy error:', err);
+                            addToast('Gagal menyalin kode amplop.', 'error');
+                          }
+                        }}
+                      >
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Klik untuk select atau gunakan tombol copy
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div className="flex justify-between">
@@ -388,7 +430,7 @@ export default function EnvelopeDetailPage() {
                       {getStatusBadge(recipient.claim.status, envelope.distributionMode)}
                     </div>
 
-                    {recipient.claim.status === "PENDING" && (
+                    <div className="flex justify-between items-center">
                       <div className="flex gap-2 mt-3">
                         <Button
                           variant="outline"
@@ -411,13 +453,13 @@ export default function EnvelopeDetailPage() {
                           Share
                         </Button>
                       </div>
-                    )}
 
                     {recipient.claim.claimedAt && (
                       <p className="text-xs text-muted-foreground mt-2">
                         Diklaim: {new Date(recipient.claim.claimedAt).toLocaleString("id-ID")}
                       </p>
                     )}
+                      </div>
                   </div>
                 ))}
               </div>
