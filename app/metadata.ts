@@ -5,7 +5,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://bagiberkah.vercel.ap
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
    verification: {
-    google: "iBKUL5cUoj0BHHMA9EJ0mGlVnrNYz4K6YQGduYoO8GM",
+    google: "jYfoc1B43JxRFoqKY9GAOE3EjdNIe4AgOCk9jOcQ6U8",
   },
   title: {
     default: "BagiBerkah - Platform AI untuk Bagikan THR Lebih Bermakna",
