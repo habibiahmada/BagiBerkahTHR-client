@@ -14,6 +14,7 @@ import { TestimonialsSection } from "@/components/landing/testimonials-section";
 import { TrustSection } from "@/components/landing/trust-section";
 import { FaqSection } from "@/components/landing/faq-section";
 import { CtaSection } from "@/components/landing/cta-section";
+import { PoweredBySection } from "@/components/landing/powered-by-section";
 import { StructuredData } from "@/components/seo/structured-data";
 
 function SupportDeveloperSection() {
@@ -76,6 +77,7 @@ export default function Home() {
           <StepsSection />
           <TestimonialsSection />
           <TrustSection />
+          <PoweredBySection />
           <FaqSection />
           <SupportDeveloperSection />
           <CtaSection />

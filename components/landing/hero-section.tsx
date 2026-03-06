@@ -12,7 +12,7 @@ export function HeroSection() {
             {/* Background pattern */}
             <div className="absolute inset-0 opacity-[0.07]">
                 <Image
-                    src="/hero-pattern.jpg"
+                    src="/hero-pattern.png"
                     alt=""
                     fill
                     className="object-cover"
