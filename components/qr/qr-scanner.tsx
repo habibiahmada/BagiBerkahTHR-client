@@ -188,7 +188,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
                   await stopScanning();
                   setTimeout(() => startScanning(), 300);
                 }}
-                variant="secondary"
+                variant="outline"
                 className="flex-1"
                 size="lg"
               >
